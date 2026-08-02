@@ -18,4 +18,4 @@ It follows usual markup languages structure.
 - Organizes outputs into json file
 - Renders it
 
-#IT IS STILL A WIP NOTHING IS DONE BC IM A LAZY PIECE OF SHIT
+# IT IS STILL A WIP NOTHING IS DONE BC IM A LAZY PIECE OF SHIT
