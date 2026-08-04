@@ -7,14 +7,14 @@ data Tag = Tag String
 
     
 
-parseContentString :: String -> String 
-parseContentString (x:xs) 
+getContentString :: String -> String 
+getContentString (x:xs) 
     | x == '@' = []
-    | otherwise = x : parseContentString xs
+    | otherwise = x : getContentString xs
 
 
-parseContent :: String -> Content
-parseContent str = Content (parseContentString str)
+wrapContentString :: String -> Content
+wrapContentString str = Content (getContentString str)
 
 
 parseTag :: String -> Maybe Tag
@@ -26,7 +26,7 @@ parseTag  (x:xs)
 
 
 parseNote :: String  -> Note 
-parseNote str = Note (parseContent str) (parseTag str)
+parseNote str = Note (wrapContentString str) (parseTag str)
 
 
 
