@@ -1,5 +1,5 @@
 
-module Parser where
+module Parser (parseDocument) where
 import AST
 
 
@@ -31,15 +31,15 @@ removeEmptyLines (x:xs)
 
 -- it wraps the String from getContentString into Content data type
 parseContent :: String -> Content
-parseContent str = Content (getContentString str) where 
-    
-    -- takes a string and returns as a value everything before the @. it returns a String
-    getContentString :: String -> String 
-    getContentString [] = []
-    getContentString (x:xs) 
-        | x == '@' = []
-        | otherwise = x : getContentString xs
+parseContent str = Content (getContentString str) where
 
+        -- takes a string and returns as a value everything before the @. it returns a String
+        getContentString :: String -> String 
+        getContentString [] = []
+        getContentString (x:xs) 
+            | x == '@' = []
+            | otherwise = x : getContentString xs
+    
 -- takes a string and returns as a value everything after the @. it returns a Maybe Tag
 parseTag :: String -> Maybe Tag
 parseTag [] = Nothing
@@ -58,8 +58,7 @@ parseNotes (x:xs) = parseNote x : parseNotes xs
 
 -- Just creates a Document Data type from list of Note Data type/ Version 1 of the function
 parseDocument :: String -> Document
-parseDocument [] = Document []
-parseDocument documentContent = Document (parseNotes (splitLines documentContent))
+parseDocument documentContent = Document (parseNotes (removeEmptyLines(splitLines documentContent)))
 
 
 
