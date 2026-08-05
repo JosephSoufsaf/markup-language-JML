@@ -2,6 +2,8 @@
 module Parser where
 import AST
 
+
+
 -- Seperates lines and puts each line into an array 
 splitLines :: String -> [String]
 splitLines [] = []
@@ -54,10 +56,19 @@ parseNotes :: [String] -> [Note]
 parseNotes [] = []
 parseNotes (x:xs) = parseNote x : parseNotes xs 
 
--- Just creates a Document Data type from list of Note Data type
-parseDocument :: [Note] -> Document
-parseDocument notes = Document notes
-    
+-- Just creates a Document Data type from list of Note Data type/ Version 1 of the function
+parseDocument :: String -> Document
+parseDocument [] = Document []
+parseDocument documentContent = Document (parseNotes (splitLines documentContent))
+
+
+
+
+
+
+
+
+
 
 
 
