@@ -58,7 +58,9 @@ parseNotes (x:xs) = parseNote x : parseNotes xs
 
 -- Just creates a Document Data type from list of Note Data type/ Version 1 of the function
 parseDocument :: String -> Document
-parseDocument documentContent = Document (parseNotes (removeEmptyLines(splitLines documentContent)))
+parseDocument documentContent = Document (parseNotes (removeEmptyLines(splitLines documentContent))) -- Document [Notes]
+
+
 
 
 
