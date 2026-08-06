@@ -1,5 +1,4 @@
-module AST (Note(..), Content(..), Tag(..), Document(..)) where
-    
+module AST (Note(..), Content(..), Tag(..), Document(..), Group(..), GroupDocument(..)) where
 data Note = Note Content (Maybe Tag)
     deriving Show
 
@@ -11,3 +10,12 @@ data Tag = Tag String
 
 data Document = Document [Note]
     deriving Show
+
+-- data Group = Group Tag [Content]
+--     deriving Show
+
+-- data GroupDocument = GroupDocument [Group]
+--     deriving Show
+
+
+
