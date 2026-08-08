@@ -1,9 +1,11 @@
 import Parser 
 import AST
-import Data.Map
-import Data.Bool (Bool(True))
---Document [Note (Content "Buy milk ") (Just (Tag "shopping")),Note (Content "Finish JML parser ") (Just (Tag "todo")),Note (Content "No tag here") Nothing]
+import Data.Bool (Bool(True, False))
+import AST (Tag)
+import Data.IntMap (insert)
 
+--Document [Note (Content "Buy milk ") (Just (Tag "shopping")),Note (Content "Finish JML parser ") (Just (Tag "todo")),Note (Content "No tag here") Nothing]
+-- Objectif right now: We want to organize the document into a tuples (Tag, [Content]) and then if we find necessary make a list of said tuples
 
 
 
@@ -14,31 +16,46 @@ getNotes :: Document -> [Note]
 getNotes (Document notes) = notes
 
 getTag :: Note -> Maybe Tag
-getTag (Note _ Nothing)    = Nothing        
+getTag (Note _ Nothing)    = Nothing       
 getTag (Note _ (Just tag)) = Just tag       
+
 
 getContent :: Note -> Content
 getContent (Note content _ ) = content
 
-makeTuplesTagContent :: [Note] -> [(Maybe Tag , Content)] 
-makeTuplesTagContent [] = [] 
-makeTuplesTagContent (x:xs) = (getTag x, getContent x) : makeTuplesTagContent xs
-
-makeListTag :: [Note] -> [Maybe Tag]
-makeListTag [] = []
-makeListTag (x:xs) = if getTag x != makeListTag xs then getTag x : 
-
-
--- Maybe some real useful stuff. 
 
 isIn :: a -> [a] -> Bool
-isIn element [] = False
+isIn _ [] = False
 isIn element (x:xs)
-    | element == x = True
-    | otherwise = False
+    | x == element = True
+    | otherwise = isIn xs 
 
--- foo :: [Note] -> (Tag, [Content])
--- foo (x:xs) = if (isNotIn (getTag x) (makeListTag (x:xs))) then (getTag x, getContent x :foo xs ) else  
+getTags :: [Note] -> [Maybe Tag]
+getTag [] = []
+getTags (x:xs) = getTag x : getTags xs
+
+
+map :: (a -> b) -> [a] -> [b]
+map _ [] = []
+map fct (x:xs) = (fct x) : map fct xs
+
+organizeByTag :: [Note] -> [(Tag, [Content])]
+organizeByTag [] = []
+organizeByTag (x:xs) = 
+    case getTag x of
+        Nothing  -> organizeByTag xs
+        Just tag -> insertTagContent tag (getContent x) (organizeByTag xs)
+
+insertTagContent :: Tag -> Content -> [(Tag, [Content])] -> [(Tag, [Content])]
+insertTagContent tag content [] = [(tag, [content])]
+insertTagContent tag content ((t, contents) : xs)
+    | t == tag  = (t, content : contents) : xs
+    | otherwise = (t, contents) : insertTagContent tag content xs
+
+chronologicalOrder :: Document 
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 
 module Parser (parseDocument) where
 import AST
+import AST (Tag)
 
 
 
@@ -41,15 +42,15 @@ parseContent str = Content (getContentString str) where
             | otherwise = x : getContentString xs
     
 -- takes a string and returns as a value everything after the @. it returns a Maybe Tag
-parseTag :: String -> Maybe Tag
-parseTag [] = Nothing
-parseTag  (x:xs)
+parseTags :: String -> Maybe Tag
+parseTags [] = Nothing
+parseTags  (x:xs)
     | x == '@' = Just (Tag xs) 
-    | otherwise = parseTag xs 
+    | otherwise = parseTags xs 
 
 -- Just creates a Note Data type with Content and Tag if there is one
 parseNote :: String  -> Note 
-parseNote str = Note (parseContent str) (parseTag str)
+parseNote str = Note (parseContent str) (parseTags str)
 
 -- Just creates a list of Notes Data type each with content or tag if there is one
 parseNotes :: [String] -> [Note]
@@ -60,6 +61,16 @@ parseNotes (x:xs) = parseNote x : parseNotes xs
 parseDocument :: String -> Document
 parseDocument documentContent = Document (parseNotes (removeEmptyLines(splitLines documentContent))) -- Document [Notes]
 
+
+--Document [Note (Content "Buy milk ") [(Just (Tag "shopping")), (Just (Tag "todo")],Note (Content "Finish JML parser ") (Just (Tag "todo")),Note (Content "No tag here") Nothing]
+
+firstTag :: String -> Maybe Tag
+firstTag [] = []
+firstTag (x:xs)
+    | x == '@' = Just (Tag firstTag xs)
+
+
+-- @rest@Chocoalate
 
 
 

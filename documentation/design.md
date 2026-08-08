@@ -12,8 +12,12 @@ A Note is the fundamental unit of the language.
 
 
 # Structure
-It follows usual markup languages structure.
-- takes a file with the specific extention
-- Analyses it
-- Organizes outputs into json file
-- Renders it
+1. Read document content
+2. Parser turns content into list with appropriate data types
+3. Organizer rearranges result of parser in different ways that will each be rendered differently. 
+
+# Organizer
+As mentionned the organizer has will organize views in different ways that will permit the renderer to display content in different ways
+
+## View n°1 (Group view)
+This is the view that was in mind when the language was being created
