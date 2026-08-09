@@ -1,12 +1,23 @@
 import Parser 
 import AST
 import Data.Bool (Bool(True, False))
-import AST (Tag)
-import Data.IntMap (insert)
+import qualified Data.Map as Map
+import Data.Map (Map)
+import qualified Data.IntMap as Map
 
---Document [Note (Content "Buy milk ") (Just (Tag "shopping")),Note (Content "Finish JML parser ") (Just (Tag "todo")),Note (Content "No tag here") Nothing]
--- Objectif right now: We want to organize the document into a tuples (Tag, [Content]) and then if we find necessary make a list of said tuples
+-- Document [Note (Content "Buy milk ") [Tag "shopping"],
+-- Note (Content "Finish JML parser ") [Tag "todo"],
+-- Note (Content "What the hell is going here ") [Tag "hello",Tag "bye",Tag "and this is my life"],
+-- Note (Content "No tag here") []]
 
+-- Objectif right now: We want to organize the document into a tuples ([Tag], [Content]) and then if we find necessary make a list of said tuples
+
+
+-- Original content
+-- Buy milk @shopping
+-- Finish JML parser @todo
+-- What the hell is going here @hello@bye@and this is my life
+-- No tag here
 
 
 
@@ -30,30 +41,17 @@ isIn element (x:xs)
     | x == element = True
     | otherwise = isIn element xs 
 
-getTags :: [Note] -> [Maybe Tag]
-getTags [] = []
-getTags (x:xs) = getTag x : getTags xs
+getTags :: Note -> [Tag]
+getTags (Note _ tags) = tags
 
 
-map :: (a -> b) -> [a] -> [b]
-map _ [] = []
-map fct (x:xs) = (fct x) : map fct xs
-
-organizeByTag :: [Note] -> [(Tag, [Content])]
-organizeByTag [] = []
-organizeByTag (x:xs) = 
-    case getTag x of
-        Nothing  -> organizeByTag xs
-        Just tag -> insertTagContent tag (getContent x) (organizeByTag xs) where 
-
-            insertTagContent :: Tag -> Content -> [(Tag, [Content])] -> [(Tag, [Content])]
-            insertTagContent tag content [] = [(tag, [content])]
-            insertTagContent tag content ((t, contents) : xs)
-                | t == tag  = (t, content : contents) : xs
-                | otherwise = (t, contents) : insertTagContent tag content xs
-
-                
+organizeByTag :: [Note] -> Map Tag [Content]
+organizeByTag (x:xs) = Map.fromList  
 
 
 
 
+-- For practice might be useful to remember its signature.
+-- map :: (a -> b) -> [a] -> [b]
+-- map _ [] = []
+-- map fct (x:xs) = (fct x) : map fct xs

@@ -1,32 +1,26 @@
-
 module Parser (parseDocument) where
 import AST
-import AST (Tag)
-import Data.String (String)
-import Data.Binary.Get (remaining)
 
 
 
--- Seperates lines and puts each line into an array 
+-- Seperates lines and puts each line into an array  example output : ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 splitLines :: String -> [String]
 splitLines [] = []
 splitLines str = firstLine str : splitLines (remainingLines str) where 
     
-    -- removes the first line of a text
     remainingLines :: String -> String
     remainingLines [] =[]
     remainingLines (x:xs) 
         | x == '\n' = xs
         | otherwise = remainingLines xs
 
-    -- gets the first line of a text
     firstLine :: String -> String
     firstLine  [] = []
     firstLine  (x:xs) 
         | x == '\n' = []
         | otherwise = x : firstLine xs
 
--- removes empty lines from list of strings pretty self explanatory
+
 removeEmptyLines :: [String] -> [String]
 removeEmptyLines [] = []
 removeEmptyLines (x:xs)
@@ -34,35 +28,36 @@ removeEmptyLines (x:xs)
     | otherwise = x : removeEmptyLines xs
 
 
--- it wraps the String from getContentString into Content data type
+-- everything before the first @
 parseContent :: String -> Content
 parseContent str = Content (getContentString str) where
-
-        -- takes a string and returns as a value everything before the @. it returns a String
         getContentString :: String -> String 
         getContentString [] = []
         getContentString (x:xs) 
             | x == '@' = []
             | otherwise = x : getContentString xs
-    
 
--- takes a List of string and turns the tags into a list of maybe Tags
-parseTags :: [String] -> [Maybe Tag]
+
+-- everything AFTER the first @ (the tag portion of the line, still containing further @s)
+dropUntilTag :: String -> String
+dropUntilTag [] = []
+dropUntilTag (x:xs)
+    | x == '@'  = xs
+    | otherwise = dropUntilTag xs
+
+
+-- wraps each already-split tag string into a Tag
+parseTags :: [String] -> [Tag]
 parseTags [] = []
-parseTags (x:xs) = parseTag x : parseTags xs where 
-    -- takes a string and returns as a value everything after the @. it returns a Maybe Tag
-    parseTag :: String -> Maybe Tag
-    parseTag [] = Nothing
-    parseTag  (x:xs)
-        | x == '@' = Just (Tag xs) 
-        | otherwise = parseTag xs  where
+parseTags (x:xs) = Tag x : parseTags xs
 
 
--- puts each String tag into a list
+-- splits a string on every remaining @
 getTags :: String -> [String]
-geTags [] = []
+getTags [] = []
 getTags str = firstTag str : getTags (remainingTags str) where
-    firstTag :: String -> [Tag]
+
+    firstTag :: String -> String
     firstTag [] = []
     firstTag (x:xs)
         | x == '@' = []
@@ -71,55 +66,16 @@ getTags str = firstTag str : getTags (remainingTags str) where
     remainingTags :: String -> String
     remainingTags [] =[]
     remainingTags (x:xs) 
-        | x == '\n' = xs
-        | otherwise = remainingLines xs
+        | x == '@' = xs
+        | otherwise = remainingTags xs
 
 
+parseNote :: String -> Note 
+parseNote str = Note (parseContent str) (parseTags (removeEmptyLines (getTags (dropUntilTag str))))
 
--- Just creates a Note Data type with Content and Tag if there is one
-parseNote :: String  -> Note 
-parseNote str = Note (parseContent str) (parseTags str)
-
--- Just creates a list of Notes Data type each with content or tag if there is one
 parseNotes :: [String] -> [Note]
 parseNotes [] = []
-parseNotes (x:xs) = parseNote x : parseNotes xs 
+parseNotes (x:xs) = parseNote x : parseNotes xs
 
--- Just creates a Document Data type from list of Note Data type/ Version 1 of the function
 parseDocument :: String -> Document
-parseDocument documentContent = Document (parseNotes (removeEmptyLines(splitLines documentContent))) 
-
-
-
-
-
-
-
-
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+parseDocument documentContent = Document (parseNotes (removeEmptyLines(splitLines documentContent)))

@@ -1,5 +1,5 @@
 module AST (Note(..), Content(..), Tag(..), Document(..), Group (..), GroupDocument(..)) where
-data Note = Note Content [(Maybe Tag)]
+data Note = Note Content [Tag]
     deriving Show
 
 data Content = Content String
