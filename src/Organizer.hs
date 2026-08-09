@@ -28,10 +28,10 @@ isIn :: a -> [a] -> Bool
 isIn _ [] = False
 isIn element (x:xs)
     | x == element = True
-    | otherwise = isIn xs 
+    | otherwise = isIn element xs 
 
 getTags :: [Note] -> [Maybe Tag]
-getTag [] = []
+getTags [] = []
 getTags (x:xs) = getTag x : getTags xs
 
 
@@ -44,26 +44,16 @@ organizeByTag [] = []
 organizeByTag (x:xs) = 
     case getTag x of
         Nothing  -> organizeByTag xs
-        Just tag -> insertTagContent tag (getContent x) (organizeByTag xs)
+        Just tag -> insertTagContent tag (getContent x) (organizeByTag xs) where 
 
-insertTagContent :: Tag -> Content -> [(Tag, [Content])] -> [(Tag, [Content])]
-insertTagContent tag content [] = [(tag, [content])]
-insertTagContent tag content ((t, contents) : xs)
-    | t == tag  = (t, content : contents) : xs
-    | otherwise = (t, contents) : insertTagContent tag content xs
+            insertTagContent :: Tag -> Content -> [(Tag, [Content])] -> [(Tag, [Content])]
+            insertTagContent tag content [] = [(tag, [content])]
+            insertTagContent tag content ((t, contents) : xs)
+                | t == tag  = (t, content : contents) : xs
+                | otherwise = (t, contents) : insertTagContent tag content xs
 
-chronologicalOrder :: Document 
-
-
+                
 
 
 
 
-
-
-
-
-
-
-
- 
