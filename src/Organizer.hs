@@ -2,8 +2,7 @@ import Parser
 import AST
 import qualified Data.Map as Map
 import Data.Map (Map)
-import qualified Control.Applicative as Map
-import Distribution.Compat.CharParsing (CharParsing(string))
+
 
 
 
@@ -25,36 +24,34 @@ import Distribution.Compat.CharParsing (CharParsing(string))
 getNotes :: Document -> [Note]
 getNotes (Document notes) = notes
 
-getTag :: Note -> Maybe Tag
-getTag (Note _ (t:ts)) = Just t
-getTag (Note _ []) = Nothing
-
 
 
 getContent :: Note -> Content
 getContent (Note content _ ) = content
 
-getStringFromContent :: Content -> String 
-getStringFromContent Content string = string
 
+getTag :: Note -> Maybe Tag
+getTag (Note _ []) = Nothing
+getTag (Note _ (t:ts)) = Just t
 
-
-
-getTags :: Note -> [Tag]
-getTags (Note _ tags) = tags
-
-
-
-
-organizeByTag :: [Note] -> Map Tag [Content]
+-- Organisation that lets each note have a single tag and ignores everything after the first @. The note will still have a list of tags but all of them except the first one will be ignored.
+organizeByTag :: [(Tag, [Content])] -> Map Tag [Content]
 organizeByTag [] = Map.empty
-organizeByTag notes = Map.fromListWith (++) listTagContentTuple where
+organizeByTag listTagContentTuple = Map.fromListWith (++) listTagContentTuple
+         
 
-    listTagContentTuple = makeListTuple notes
+notesToPairs :: [Note] -> [(Tag, [Content])]
+notesToPairs [] = []
+notesToPairs (x:xs) =
+    case getTag x of 
+        Nothing -> (Tag "misc", [getContent x]) : notesToPairs xs 
+        Just t -> (t, [getContent x]) : notesToPairs xs
 
-    makeListTuple :: [Note] -> [(Tag, Content)]
-    makeListTuple [] = []
-    makeListTuple (x:xs) = (getTag x, getContent x) : makeListTuple xs
+
+-- Note (Content "Buy milk ") [Tag "shopping"]   
+
+
+
 
 
 
