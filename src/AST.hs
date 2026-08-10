@@ -6,7 +6,7 @@ data Content = Content String
     deriving Show
 
 data Tag = Tag String
-    deriving (Show, Eq)
+    deriving (Show, Eq, Ord)
 
 data Document = Document [Note]
     deriving Show

@@ -1,14 +1,13 @@
 import Parser 
 import AST
-import Data.Bool (Bool(True, False))
 import qualified Data.Map as Map
 import Data.Map (Map)
-import qualified Data.IntMap as Map
+import qualified Control.Applicative as Map
+import Distribution.Compat.CharParsing (CharParsing(string))
 
--- Document [Note (Content "Buy milk ") [Tag "shopping"],
--- Note (Content "Finish JML parser ") [Tag "todo"],
--- Note (Content "What the hell is going here ") [Tag "hello",Tag "bye",Tag "and this is my life"],
--- Note (Content "No tag here") []]
+
+
+-- Document [Note (Content "Buy milk ") [Tag "shopping"], Note (Content "Finish JML parser ") [Tag "todo"], Note (Content "What the hell is going here ") [Tag "hello",Tag "bye",Tag "and this is my life"], Note (Content "No tag here") []]
 
 -- Objectif right now: We want to organize the document into a tuples ([Tag], [Content]) and then if we find necessary make a list of said tuples
 
@@ -27,26 +26,36 @@ getNotes :: Document -> [Note]
 getNotes (Document notes) = notes
 
 getTag :: Note -> Maybe Tag
-getTag (Note _ Nothing)    = Nothing       
-getTag (Note _ (Just tag)) = Just tag       
+getTag (Note _ (t:ts)) = Just t
+getTag (Note _ []) = Nothing
+
 
 
 getContent :: Note -> Content
 getContent (Note content _ ) = content
 
+getStringFromContent :: Content -> String 
+getStringFromContent Content string = string
 
-isIn :: a -> [a] -> Bool
-isIn _ [] = False
-isIn element (x:xs)
-    | x == element = True
-    | otherwise = isIn element xs 
+
+
 
 getTags :: Note -> [Tag]
 getTags (Note _ tags) = tags
 
 
+
+
 organizeByTag :: [Note] -> Map Tag [Content]
-organizeByTag (x:xs) = Map.fromList  
+organizeByTag [] = Map.empty
+organizeByTag notes = Map.fromListWith (++) listTagContentTuple where
+
+    listTagContentTuple = makeListTuple notes
+
+    makeListTuple :: [Note] -> [(Tag, Content)]
+    makeListTuple [] = []
+    makeListTuple (x:xs) = (getTag x, getContent x) : makeListTuple xs
+
 
 
 
@@ -55,3 +64,10 @@ organizeByTag (x:xs) = Map.fromList
 -- map :: (a -> b) -> [a] -> [b]
 -- map _ [] = []
 -- map fct (x:xs) = (fct x) : map fct xs
+
+-- For practice might be useful to remember its signature.
+-- isIn :: a -> [a] -> Bool
+-- isIn _ [] = False
+-- isIn element (x:xs)
+--     | x == element = True
+--     | otherwise = isIn element xs 
