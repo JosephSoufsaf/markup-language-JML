@@ -1,3 +1,5 @@
+
+module Organizer where
 import Parser 
 import AST
 import qualified Data.Map as Map
@@ -6,20 +8,17 @@ import Data.Map (Map)
 
 
 
+
 -- Document [Note (Content "Buy milk ") [Tag "shopping"], Note (Content "Finish JML parser ") [Tag "todo"], Note (Content "What the hell is going here ") [Tag "hello",Tag "bye",Tag "and this is my life"], Note (Content "No tag here") []]
 
--- Objectif right now: We want to organize the document into a tuples ([Tag], [Content]) and then if we find necessary make a list of said tuples
-
-
--- Original content
--- Buy milk @shopping
--- Finish JML parser @todo
--- What the hell is going here @hello@bye@and this is my life
--- No tag here
 
 
 
--- a bunch of random fucking functions I dont know what I will do with but I might need cause I am not good at recursions
+
+
+
+
+
 
 getNotes :: Document -> [Note]
 getNotes (Document notes) = notes

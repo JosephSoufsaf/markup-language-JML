@@ -10,7 +10,7 @@ splitLines :: String -> [String]
 splitLines [] = []
 splitLines str = firstLine str : splitLines (remainingLines str) where 
     
-    -- Example input: "Buy milk @shopping\nFinish JML parser @todo"
+    -- Example input: "Buy milk @shopping\nFinish JML parser @todo" 
     -- Example output: "Finish JML parser @todo"
     remainingLines :: String -> String
     remainingLines [] =[]
