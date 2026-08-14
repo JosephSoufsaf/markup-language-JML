@@ -1,5 +1,5 @@
 
-module Organizer where
+module Organizer (organizeByTag, notesToPairs, getNotes) where
 import Parser 
 import AST
 import qualified Data.Map as Map
@@ -10,14 +10,6 @@ import Data.Map (Map)
 
 
 -- Document [Note (Content "Buy milk ") [Tag "shopping"], Note (Content "Finish JML parser ") [Tag "todo"], Note (Content "What the hell is going here ") [Tag "hello",Tag "bye",Tag "and this is my life"], Note (Content "No tag here") []]
-
-
-
-
-
-
-
-
 
 
 getNotes :: Document -> [Note]
@@ -45,13 +37,6 @@ notesToPairs (x:xs) =
     case getTag x of 
         Nothing -> (Tag "misc", [getContent x]) : notesToPairs xs 
         Just t -> (t, [getContent x]) : notesToPairs xs
-
-
--- Note (Content "Buy milk ") [Tag "shopping"]   
-
-
-
-
 
 
 
