@@ -20,22 +20,16 @@ data Document = Document [Note]
     deriving Show
 
 data DocTree = TagNode Tag [DocTree] | ContentNode Content
+    deriving(Show, Eq)
 
 
-findAmongSiblings :: Tag -> [DocTree] -> Maybe DocTree
-findAmongSiblings tag [] = Nothing
-findAmongSiblings tag ((TagNode tagValue _ ) :xs)
-    | tag == tagValue = Just (TagNode tagValue children )
-    | otherwise = findAmongSiblings tag xs
-findAmongSiblings tag (ContentNode content: xs) = findAmongSiblings tag xs
 
-findAmongChildren :: Tag -> DocTree -> Maybe DocTree
-findAmongChildren tag (TagNode tagValue children) = findAmongSiblings tag children
-findAmongChildren tag (ContentNode Content) = Nothing
+
+
 
 
             
-
+-- [Tag "shopping", Tag "walmart", Tag "instacart"]
 
 
 
