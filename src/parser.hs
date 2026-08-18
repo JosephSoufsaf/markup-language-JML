@@ -97,6 +97,9 @@ getTags str = firstTag str : getTags (remainingTags str) where
 parseNote :: String -> Note 
 parseNote str = Note (parseContent str) (parseTags (removeEmptyLines (getTags (dropUntilTag str))))
 
+
+
+
 -- Example input:  ["Buy milk @shopping", "No tag here"]
 -- Example output: [Note (Content "Buy milk ") [Tag "shopping"], Note (Content "No tag here") []]
 parseNotes :: [String] -> [Note]
