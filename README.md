@@ -13,9 +13,7 @@ A Note is the fundamental unit of the language.
 
 # Structure
 It follows usual markup languages structure.
-- takes a file with the specific extention
-- Analyses it
-- Organizes outputs into json file
-- Renders it
-
-# IT IS STILL A WIP NOTHING IS DONE BC IM A LAZY PIECE OF SHIT
+- Parses a file
+- Based on header information organizes file certain way
+- Renders file through HTML directly with haskell
+- Main function opens rendered HTML file in browser
