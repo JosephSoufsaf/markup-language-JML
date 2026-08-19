@@ -46,7 +46,6 @@ This reads notes.jml, organizes the notes, writes the result to output.html, and
 
 Running it by name from any folder currently requires adding it to your PATH environment variable yourself. An installer that does this automatically is planned but not built yet.
 
-
 # How organization works
 
 Right now the program builds two different views of your notes from the same file, and shows both.
@@ -55,6 +54,3 @@ Flat view: every tag becomes its own group. If a note has more than one tag, onl
 
 Tree view: tags are nested inside each other based on the order you wrote them. The first tag on a note is treated as the outer, more general one, and each tag after it is nested one level deeper, inside the one before it. For example, a note written as @shopping@walmart puts it under shopping, and inside that, under walmart. If two notes share the same tag at the same level, they get combined into one branch instead of showing up twice. A tag can have both its own notes and further tags nested under it at the same time. Notes with no tag at all sit at the very top level, not nested under anything. The order tags are written in matters, @shopping@walmart and @walmart@shopping are treated as two different, unrelated branches.
 
-Each group or branch appears as a collapsible section you can click to expand or hide.
-
-This reads notes.jml, organizes the notes, writes the result to output.html, and opens it in your default browser automatically. Each tag section is collapsible, click it to expand or hide its contents.
