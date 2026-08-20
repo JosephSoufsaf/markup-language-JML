@@ -1,4 +1,4 @@
-module AST (Note(..), Content(..), Tag(..), Document(..), TagTree(..)) where
+module AST (Note(..), Content(..), Tag(..), Document(..), DocTree(..)) where
 
 
 -- data Group = Group Tag [Content]
@@ -8,19 +8,19 @@ module AST (Note(..), Content(..), Tag(..), Document(..), TagTree(..)) where
 --     deriving Show
 
 data Note = Note Content [Tag]
-    deriving Show
+    deriving (Show, Eq)
 
 data Content = Content String
-    deriving Show
+    deriving (Show, Eq)
 
 data Tag = Tag String
     deriving (Show, Eq, Ord)
 
 data Document = Document [Note]
-    deriving Show
+    deriving (Show, Eq)
 
 data DocTree = TagNode Tag [DocTree] | ContentNode Content
-    deriving(Show, Eq)
+    deriving (Show, Eq)
 
 
 

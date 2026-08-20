@@ -1,5 +1,5 @@
 
-module Organizer (singleTagSorting, notesToPairs, getNotes) where
+module Organizer (singleTagSorting, notesToPairs, getNotes, getTags, getContent, sortMiscLast) where
 import Parser 
 import AST
 import qualified Data.Map as Map
@@ -27,7 +27,7 @@ getContent (Note content _ ) = content
 
 -- Input/Output Examples
 -- Input:  Note (Content "Buy milk ") [Tag "shopping", Tag "walmart"]
--- Output: Just (Tag "shopping")
+-- Output: Just (Tag "shopping")rou
 -- Input:  Note (Content "No tag here") []
 -- Output: Nothing
 getTag :: Note -> Maybe Tag
@@ -41,8 +41,8 @@ getTag (Note _ (t:ts)) = Just t
 -- Input:  Note (Content "No tag here") []
 -- Output: Nothing
 getTags :: Note -> Maybe [Tag]
-getTags Note _ [] = Nothing
-getTags Note _ tags = Just tags
+getTags (Note _ []) = Nothing
+getTags (Note _ tags) = Just tags
 
 
 
@@ -52,6 +52,7 @@ getTags Note _ tags = Just tags
 singleTagSorting :: [(Tag, [Content])] -> Map Tag [Content]
 singleTagSorting [] = Map.empty
 singleTagSorting listTagContentTuple = Map.fromListWith (++) listTagContentTuple
+
     
 -- Input/Output Examples
 -- Input:  [Note (Content "Buy milk ") [Tag "shopping"], Note (Content "No tag here") []]
@@ -64,24 +65,10 @@ notesToPairs (x:xs) =
         Just t  -> (t, [getContent x]) : notesToPairs xs
 
 
+sortMiscLast :: [(Tag, [Content])] -> [(Tag, [Content])]
+sortMiscLast pairs = filter notMisc pairs ++ filter isMisc pairs
+  where
+    isMisc (Tag "misc", _) = True
+    isMisc _ = False
+    notMisc pair = not (isMisc pair)
 
-
-
-
-
-
-
-
-
-
--- For practice might be useful to remember its signature.
--- map :: (a -> b) -> [a] -> [b]
--- map _ [] = []
--- map fct (x:xs) = (fct x) : map fct xs
-
--- For practice might be useful to remember its signature.
--- isIn :: a -> [a] -> Bool
--- isIn _ [] = False
--- isIn element (x:xs)
---     | x == element = True
---     | otherwise = isIn element xs 

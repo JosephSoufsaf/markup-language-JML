@@ -7,13 +7,25 @@ import AST
 import Organizer
 
 -- Example input:  [(Tag "shopping", [Content "Buy milk"]), (Tag "todo", [Content "Finish JML parser"])]
--- Example output: <h2>shopping</h2><ul><li>Buy milk</li></ul><h2>todo</h2><ul><li>Finish JML parser</li></ul>
+-- Example output: <details><summary>shopping</summary><p>Buy milk</p></details><details><summary>todo</summary><p>Finish JML parser</p></details>
 renderNote :: [(Tag, [Content])] -> Html ()
 renderNote [] = mempty
-renderNote ((Tag tag, contents) : xs) = (h2_ (toHtml tag) <> ul_ (renderContent contents)) <> renderNote xs where
+renderNote ((Tag tag, contents) : xs) = details_ (summary_ (toHtml tag) <> renderContent contents) <> renderNote xs where
     
     -- Example input:  [Content "Buy milk", Content "Buy eggs"]
-    -- Example output: <li>Buy milk</li><li>Buy eggs</li>
+    -- Example output: <p>Buy milk</p><p>Buy eggs</p>
     renderContent :: [Content] -> Html ()
     renderContent [] = mempty
-    renderContent (Content content : xs) = li_ (toHtml content) <> renderContent xs
+    renderContent (Content content : xs) = p_ (toHtml content) <> renderContent xs
+
+renderTree :: [DocTree] -> Html ()
+renderTree [] = mempty
+renderTree trees = mapM_ renderNode trees
+  where
+    renderNode :: DocTree -> Html ()
+    renderNode (TagNode (Tag name) children) = details_ (summary_ (toHtml name) <> renderTree children)
+    renderNode (ContentNode (Content text)) = p_ (toHtml text)
+
+
+
+

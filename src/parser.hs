@@ -68,6 +68,7 @@ parseTags [] = []
 parseTags (x:xs) = Tag x : parseTags xs
 
 
+-- getTags and parseTags work together
 -- splits a string on every remaining @
 -- Example input:  "shopping@walmart"
 -- Example output: ["shopping", "walmart"]
@@ -92,10 +93,26 @@ getTags str = firstTag str : getTags (remainingTags str) where
         | otherwise = remainingTags xs
 
 
+trimTags :: [Tag] -> [Tag]
+trimTags [] = []
+trimTags ((Tag name):xs) = Tag (trimEdges name) : trimTags xs
+
+
+trimEdges :: String -> String
+trimEdges str = reverse (removeEmptySpace (reverse (removeEmptySpace str))) where
+    removeEmptySpace :: String -> String
+    removeEmptySpace [] = []
+    removeEmptySpace (c:cs)
+        | c == ' '  = removeEmptySpace cs
+        | otherwise = c : cs
+
+
+
+
 -- Example input:  "Buy milk @shopping@walmart"
 -- Example output: Note (Content "Buy milk ") [Tag "shopping", Tag "walmart"]
 parseNote :: String -> Note 
-parseNote str = Note (parseContent str) (parseTags (removeEmptyLines (getTags (dropUntilTag str))))
+parseNote str = Note (parseContent str) (trimTags (parseTags (removeEmptyLines (getTags (dropUntilTag str)))))
 
 
 

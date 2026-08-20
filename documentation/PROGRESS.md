@@ -33,10 +33,14 @@
 - Building the tree (Tree.hs): insertTag adds one note's tags into the tree, one level at a time. mergeTag checks if a tag already exists at that spot and combines the two branches instead of making a duplicate. Tested by hand with the shopping/walmart and shopping/homedepot example and it works.
 
 - buildTree: take the full list of notes and build the whole tree by inserting them one by one. This is the next thing to do. **Definitve**
+
+- trim white space from tag list so you can write @shopping@walmart or @shopping @walmart and its the same thing. The trim removes the front empty space and end empty space. String like " shopping " becomes "shopping"
  
 
 ## Next
-
-- trim white space from tag list so you can write @shopping@walmart or @shopping @walmart and its the same thing 
   
 - Decide what should happen when a line is only a tag with no actual text before it, like "@shopping" with nothing written first. Right now this creates a note with empty content, which shows up as a blank line in the page. Need to decide: skip it, warn about it, or treat it some other way.
+
+- Brainstorm new ways to render the notes besides html 
+  
+- Make the rendered output.html file have a better style
