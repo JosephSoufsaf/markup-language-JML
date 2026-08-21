@@ -21,12 +21,12 @@ main = do
             text <- readFile filename
             let notes = getNotes (parseDocument text)
 
-            -- flat pipeline
+            -- flat
             let grouped = singleTagSorting (notesToPairs notes)
             let flatHtml = renderNote (sortMiscLast (Map.toList grouped))
 
-            -- tree pipeline
-            let tree = buildTree notes
+            -- tree 
+            let tree = sortTreeAlphabetical(buildTree notes) 
             let treeHtml = renderTree tree
 
             renderToFile "output.html" $

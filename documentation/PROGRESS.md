@@ -1,6 +1,6 @@
-# Progress - Note Markup Language (jml)
+# Progress - Note Markup Language 
 
-## Design decisions (settled, don't re-litigate)
+## Design decisions
 
 - A Note holds its content and a list of tags. It can have zero, one, or many tags.
 
@@ -35,6 +35,8 @@
 - buildTree: take the full list of notes and build the whole tree by inserting them one by one. This is the next thing to do. **Definitve**
 
 - trim white space from tag list so you can write @shopping@walmart or @shopping @walmart and its the same thing. The trim removes the front empty space and end empty space. String like " shopping " becomes "shopping"
+  
+- implement sorting functions to sort alphabetically
  
 
 ## Next
@@ -45,4 +47,4 @@
   
 - Make the rendered output.html file have a better style
 
-- implement sorting functions to sort alphabetically or choronogically each node
+
