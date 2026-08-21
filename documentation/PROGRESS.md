@@ -44,3 +44,5 @@
 - Brainstorm new ways to render the notes besides html 
   
 - Make the rendered output.html file have a better style
+
+- implement sorting functions to sort alphabetically or choronogically each node

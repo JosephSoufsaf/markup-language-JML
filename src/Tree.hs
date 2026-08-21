@@ -46,3 +46,25 @@ buildTree (n:ns) =
     case getTags n of
         Nothing   -> ContentNode (getContent n) : buildTree ns
         Just tags -> insertTag tags (getContent n) (buildTree ns)
+
+
+extractString :: DocTree -> String
+extractString (TagNode (Tag name) _) = name
+extractString (ContentNode (Content text)) = text
+
+sortTreeAlphabetical :: [DocTree] -> [DocTree]
+sortTreeAlphabetical trees = map sortChildren (sortBy (comparing extractString) trees)
+  where
+    sortChildren :: DocTree -> DocTree
+    sortChildren (TagNode tag children) = TagNode tag (sortTreeAlphabetical children)
+    sortChildren leaf = leaf
+
+
+
+
+
+
+
+
+
+
