@@ -1,7 +1,9 @@
-module Tree (insertTag, mergeTag, buildTree) where
+module Tree (insertTag, mergeTag, buildTree, sortTreeAlphabetical) where
 
 import AST
 import Organizer
+import Data.List (sortBy)
+import Data.Ord (comparing)
 
 
 -- Input:  insertTag [Tag "shopping", Tag "walmart"] (Content "Buy milk") []

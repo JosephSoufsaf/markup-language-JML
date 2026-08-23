@@ -28,6 +28,8 @@ data DocTree = TagNode Tag [DocTree] | ContentNode Content
 
 
 
+
+
             
 -- [Tag "shopping", Tag "walmart", Tag "instacart"]
 

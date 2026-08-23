@@ -4,8 +4,8 @@ import AST
 
 
 -- Seperates lines and puts each line into an array
--- Example input:  "Buy milk @shopping\nFinish JML parser @todo\nNo tag here"
--- Example output: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
+-- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here"
+-- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 splitLines :: String -> [String]
 splitLines [] = []
 splitLines str = firstLine str : splitLines (remainingLines str) where 
@@ -35,6 +35,39 @@ removeEmptyLines (x:xs)
     | x == "" = removeEmptyLines xs
     | otherwise = x : removeEmptyLines xs
 
+containsKey :: String -> Bool
+containsKey (x:xs)
+            | x == '#' = True
+            | otherwise = False 
+
+o
+getHeaders :: [String] -> [String]
+getHeaders [] = []
+getHeaders (x:xs)
+    | containsKey x = x : getHeaders xs
+    | otherwise = getHeaders xs
+
+
+getKey :: String -> String
+getKey [] = []
+getKey (x:xs)
+    | x == '#'  = getKey xs
+    | x == ':'  = []
+    | otherwise = x : getKey xs
+
+getValue :: String -> String
+getValue [] = []
+getValue (x:xs)
+    | x == ':'  = xs
+    | otherwise = getValue xs
+
+
+
+
+
+
+
+    
 
 -- everything before the first @
 -- Example input:  "Buy milk @shopping"
@@ -66,6 +99,11 @@ dropUntilTag (x:xs)
 parseTags :: [String] -> [Tag]
 parseTags [] = []
 parseTags (x:xs) = Tag x : parseTags xs
+
+
+
+
+
 
 
 -- getTags and parseTags work together
@@ -107,14 +145,10 @@ trimEdges str = reverse (removeEmptySpace (reverse (removeEmptySpace str))) wher
         | otherwise = c : cs
 
 
-
-
 -- Example input:  "Buy milk @shopping@walmart"
 -- Example output: Note (Content "Buy milk ") [Tag "shopping", Tag "walmart"]
 parseNote :: String -> Note 
 parseNote str = Note (parseContent str) (trimTags (parseTags (removeEmptyLines (getTags (dropUntilTag str)))))
-
-
 
 
 -- Example input:  ["Buy milk @shopping", "No tag here"]
