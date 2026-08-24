@@ -63,12 +63,6 @@ getValue (x:xs)
 
 
 
-
-
-
-
-    
-
 -- everything before the first @
 -- Example input:  "Buy milk @shopping"
 -- Example output: Content "Buy milk "
