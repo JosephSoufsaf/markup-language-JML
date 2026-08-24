@@ -75,6 +75,7 @@ findViewValue (line:rest)
     | otherwise = findViewValue rest
 
 
+<<<<<<< HEAD
 findSortValue :: [String] -> String
 findSortValue [] = "alphabetical"
 findSortValue (line:rest)
@@ -85,6 +86,8 @@ findSortValue (line:rest)
 
     
 
+=======
+>>>>>>> Tree-Chronological-sorting
 -- everything before the first @
 -- Example input:  "Buy milk @shopping"
 -- Example output: Content "Buy milk "
