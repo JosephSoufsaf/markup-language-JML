@@ -1,4 +1,4 @@
-module Parser (parseDocument) where
+module Parser (parseDocument, splitLines, getHeaders, findViewValue, findSortValue) where
 import AST
 
 
@@ -35,16 +35,23 @@ removeEmptyLines (x:xs)
     | x == "" = removeEmptyLines xs
     | otherwise = x : removeEmptyLines xs
 
-containsKey :: String -> Bool
-containsKey (x:xs)
+removeHeaders ::  [String] -> [String]
+removeHeaders [] = []
+removeHeaders (x:xs)
+    | containsHeader x = removeHeaders xs
+    | otherwise = x : removeHeaders xs
+
+containsHeader :: String -> Bool
+containsHeader [] = False
+containsHeader (x:xs)
             | x == '#' = True
             | otherwise = False 
 
-o
+
 getHeaders :: [String] -> [String]
 getHeaders [] = []
 getHeaders (x:xs)
-    | containsKey x = x : getHeaders xs
+    | containsHeader x = x : getHeaders xs
     | otherwise = getHeaders xs
 
 
@@ -61,9 +68,18 @@ getValue (x:xs)
     | x == ':'  = xs
     | otherwise = getValue xs
 
+findViewValue :: [String] -> String
+findViewValue [] = "flat"
+findViewValue (line:rest)
+    | getKey line == "view" = getValue line
+    | otherwise = findViewValue rest
 
 
-
+findSortValue :: [String] -> String
+findSortValue [] = "alphabetical"
+findSortValue (line:rest)
+    | getKey line == "sort" = getValue line
+    | otherwise             = findSortValue rest
 
 
 
@@ -160,4 +176,4 @@ parseNotes (x:xs) = parseNote x : parseNotes xs
 -- Example input:  "Buy milk @shopping\nNo tag here"
 -- Example output: Document [Note (Content "Buy milk ") [Tag "shopping"], Note (Content "No tag here") []]
 parseDocument :: String -> Document
-parseDocument documentContent = Document (parseNotes (removeEmptyLines(splitLines documentContent)))
+parseDocument documentContent = Document (parseNotes (removeHeaders (removeEmptyLines (splitLines documentContent))))

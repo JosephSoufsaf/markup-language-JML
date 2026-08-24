@@ -2,7 +2,7 @@
 
 import System.Environment (getArgs)
 import System.Process (callCommand)
-import Lucid (renderToFile, h1_, style_, toHtml, Html)
+import Lucid (renderToFile, style_, toHtml, Html)
 import Parser
 import AST
 import Organizer
@@ -19,20 +19,24 @@ main = do
     case args of
         [filename] -> do
             text <- readFile filename
+            let allLines = splitLines text
+            let headerLines = getHeaders allLines
+            let viewChoice = findViewValue headerLines
+            let sortChoice = findSortValue headerLines
+
             let notes = getNotes (parseDocument text)
 
-            -- flat pipeline
-            let grouped = singleTagSorting (notesToPairs notes)
-            let flatHtml = renderNote (sortMiscLast (Map.toList grouped))
-
-            -- tree pipeline
-            let tree = sortTreeAlphabetical (buildTree notes)
-            let treeHtml = renderTree tree
-
-            renderToFile "output.html" $
-                defaultStyle <>
-                h1_ "Flat view" <> flatHtml <>
-                h1_ "Tree view" <> treeHtml
+            if viewChoice == "tree"
+                then do
+                    let builtTree = buildTree notes
+                    let sortedTree = if sortChoice == "alphabetical"
+                                        then sortTreeAlphabetical builtTree
+                                        else builtTree
+                    renderToFile "output.html" (defaultStyle <> renderTree sortedTree)
+                else do
+                    let grouped = singleTagSorting (notesToPairs notes)
+                    let flatHtml = renderNote (sortMiscLast (Map.toList grouped))
+                    renderToFile "output.html" (defaultStyle <> flatHtml)
 
             callCommand "start output.html"
         _ -> putStrLn "Usage: jml <path-to-.jml-file>"
