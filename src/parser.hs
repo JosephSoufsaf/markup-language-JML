@@ -1,4 +1,4 @@
-module Parser (parseDocument, splitLines, getHeaders, findViewValue, findSortValue) where
+module Parser (parseDocument, splitLines, findViewValue, findSortValue) where
 import AST
 
 
@@ -40,25 +40,22 @@ removeEmptyLines (x:xs)
 
 
 
+
 -------------- START OF HEADER FUNCTIONS --------------
+-- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
+-- Example Output: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 removeHeaders ::  [String] -> [String]
 removeHeaders [] = []
 removeHeaders (x:xs)
     | containsHeader x = removeHeaders xs
     | otherwise = x : removeHeaders xs
 
+-- Helper functions for the header
 containsHeader :: String -> Bool
 containsHeader [] = False
 containsHeader (x:xs)
             | x == '#' = True
             | otherwise = False 
-
-
-getHeaders :: [String] -> [String]
-getHeaders [] = []
-getHeaders (x:xs)
-    | containsHeader x = x : getHeaders xs
-    | otherwise = getHeaders xs
 
 
 getKey :: String -> String
@@ -73,8 +70,6 @@ getValue [] = []
 getValue (x:xs)
     | x == ':'  = xs
     | otherwise = getValue xs
-    
-
 
 findViewValue :: [String] -> String
 findViewValue [] = "flat"
@@ -87,24 +82,33 @@ findSortValue :: [String] -> String
 findSortValue [] = "alphabetical"
 findSortValue (line:rest)
     | getKey line == "sort" = getValue line
-    | otherwise             = findSortValue rest
+    | otherwise = findSortValue rest
 
 -------------- END OF HEADER FUNCTIONS --------------
 
+
+-------------- START OF INDEX ASSIGNING FUNCTIONS --------------
+-- Example Input: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
+-- Example Output: [(1, "Buy milk @shopping", (2, "Finish JML parser @todo"), (3, "No tag here")]
+assignIndex :: [String] -> [(Int, String)]
+assignIndex lines = (zip [0..] lines)
+
+-------------- END OF INDEX ASSIGNING FUNCTIONS --------------
+
     
 -------------- START OF PARSING FUNCTIONS --------------
--- everything before the first @
--- Example input:  "Buy milk @shopping"
--- Example output: Content "Buy milk "
-parseContent :: String -> Content  
-parseContent str = Content index (getContentString str) where
-        -- Example input:  "Buy milk @shopping"
-        -- Example output: "Buy milk "
-        getContentString :: String -> String 
-        getContentString [] = []
-        getContentString (x:xs) 
-            | x == '@' = []
-            | otherwise = x : getContentString xs
+
+-- Example Input: (1, "Buy Milk @shopping")
+-- Example Output : Content 1 "Buy Milk"
+parseContent :: (Int, String) -> Content
+parseContent (index, line) = Content index (getContentString line) where
+    -- Example input:  (1, "Buy milk @shopping")
+    -- Example output: Content 1 "Buy Milk"
+    getContentString :: String -> String 
+    getContentString [] = []
+    getContentString (x:xs) 
+        | x == '@' = []
+        | otherwise = x : getContentString xs
 
 
 -- everything AFTER the first @
@@ -164,22 +168,23 @@ trimEdges str = reverse (removeEmptySpace (reverse (removeEmptySpace str))) wher
         | otherwise = c : cs
 
 
--- Example input:  "Buy milk @shopping@walmart"
--- Example output: Note (Content "Buy milk ") [Tag "shopping", Tag "walmart"]
-parseNote :: String -> Note 
-parseNote str = Note (parseContent str) (trimTags (parseTags (removeEmptyLines (getTags (dropUntilTag str)))))
+-- Example Input: [(1, "Buy milk @shopping")]
+-- Example output: Note (Content 1 "Buy milk ") [Tag "shopping"]
+parseNote :: (Int, String) -> Note
+parseNote (index, line) = Note (parseContent (index, line)) (trimTags (parseTags (removeEmptyLines (getTags (dropUntilTag line)))))
 
 
--- Example input:  ["Buy milk @shopping", "No tag here"]
--- Example output: [Note (Content "Buy milk ") [Tag "shopping"], Note (Content "No tag here") []]
-parseNotes :: [String] -> [Note]
+
+-- Example input:  [(1, "Buy milk @shopping"), (2, "No tag here")]
+-- Example output: [Note (Content 1 "Buy milk ") [Tag "shopping"], Note (Content 2 "No tag here") []]
+parseNotes :: [(Int, String)] -> [Note]
 parseNotes [] = []
 parseNotes (x:xs) = parseNote x : parseNotes xs
 
 -- Example input:  "Buy milk @shopping\nNo tag here"
 -- Example output: Document [Note (Content "Buy milk ") [Tag "shopping"], Note (Content "No tag here") []]
 parseDocument :: String -> Document
-parseDocument documentContent = Document (parseNotes (removeHeaders (removeEmptyLines (splitLines documentContent))))
+parseDocument documentContent = Document (parseNotes (assignIndex (removeHeaders (removeEmptyLines (splitLines documentContent)))))
 
 
 -------------- END OF PARSING FUNCTIONS --------------
