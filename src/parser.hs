@@ -3,6 +3,7 @@ import AST
 
 
 
+--------------  START OF LINE SPLITTING FUNCTIONS --------------
 -- Seperates lines and puts each line into an array
 -- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here"
 -- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
@@ -35,6 +36,11 @@ removeEmptyLines (x:xs)
     | x == "" = removeEmptyLines xs
     | otherwise = x : removeEmptyLines xs
 
+--------------  END OF LINE SPLITTING FUNCTIONS --------------
+
+
+
+-------------- START OF HEADER FUNCTIONS --------------
 removeHeaders ::  [String] -> [String]
 removeHeaders [] = []
 removeHeaders (x:xs)
@@ -67,6 +73,8 @@ getValue [] = []
 getValue (x:xs)
     | x == ':'  = xs
     | otherwise = getValue xs
+    
+
 
 findViewValue :: [String] -> String
 findViewValue [] = "flat"
@@ -75,24 +83,21 @@ findViewValue (line:rest)
     | otherwise = findViewValue rest
 
 
-<<<<<<< HEAD
 findSortValue :: [String] -> String
 findSortValue [] = "alphabetical"
 findSortValue (line:rest)
     | getKey line == "sort" = getValue line
     | otherwise             = findSortValue rest
 
-
+-------------- END OF HEADER FUNCTIONS --------------
 
     
-
-=======
->>>>>>> Tree-Chronological-sorting
+-------------- START OF PARSING FUNCTIONS --------------
 -- everything before the first @
 -- Example input:  "Buy milk @shopping"
 -- Example output: Content "Buy milk "
 parseContent :: String -> Content  
-parseContent str = Content (getContentString str) where
+parseContent str = Content index (getContentString str) where
         -- Example input:  "Buy milk @shopping"
         -- Example output: "Buy milk "
         getContentString :: String -> String 
@@ -118,11 +123,6 @@ dropUntilTag (x:xs)
 parseTags :: [String] -> [Tag]
 parseTags [] = []
 parseTags (x:xs) = Tag x : parseTags xs
-
-
-
-
-
 
 
 -- getTags and parseTags work together
@@ -180,3 +180,6 @@ parseNotes (x:xs) = parseNote x : parseNotes xs
 -- Example output: Document [Note (Content "Buy milk ") [Tag "shopping"], Note (Content "No tag here") []]
 parseDocument :: String -> Document
 parseDocument documentContent = Document (parseNotes (removeHeaders (removeEmptyLines (splitLines documentContent))))
+
+
+-------------- END OF PARSING FUNCTIONS --------------
