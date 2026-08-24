@@ -10,7 +10,7 @@ module AST (Note(..), Content(..), Tag(..), Document(..), DocTree(..)) where
 data Note = Note Content [Tag]
     deriving (Show, Eq)
 
-data Content = Content String
+data Content = Content Int String
     deriving (Show, Eq)
 
 data Tag = Tag String
@@ -19,7 +19,7 @@ data Tag = Tag String
 data Document = Document [Note]
     deriving (Show, Eq)
 
-data DocTree = TagNode Tag [DocTree] | ContentNode Content
+data DocTree = TagNode Tag [DocTree]  | ContentNode Content
     deriving (Show, Eq)
 
 
