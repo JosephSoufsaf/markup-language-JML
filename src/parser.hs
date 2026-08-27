@@ -1,3 +1,9 @@
+module Parser where
+import AST
+import qualified Data.Map as Map
+
+
+
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
 -- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here"
 -- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
@@ -51,6 +57,13 @@ containsHeader [] = False
 containsHeader (x:xs)
             | x == '#' = True
             | otherwise = False 
+
+
+getHeaders :: [String] -> [String]
+getHeaders [] = []
+getHeaders (x:xs)
+    | containsHeader x = x : getHeaders xs
+    | otherwise = getHeaders xs
 
 
 -- Example Input: "#view:tree"

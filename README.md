@@ -17,12 +17,12 @@ A Note is the fundamental unit of the language.
 
 It follows the usual markup language structure.
 
-- Parses a file into notes.
-- Organizes the notes into different views (currently a flat view grouped by tag, and a tree view nested by tag).
-- Renders each view directly to HTML with Haskell, no intermediate file or second language involved.
+- Parses a file into notes, assigning each one a number based on its position in the file.
+- Reads optional settings written at the top of the file to decide which view and sort order to use.
+- Organizes the notes into a view (currently a flat view grouped by tag, and a tree view nested by tag).
+- Sorts the chosen view, either alphabetically or by the order the notes were originally written in.
+- Renders the view directly to HTML with Haskell, no intermediate file or second language involved.
 - The main program opens the rendered HTML file in the browser.
-
-Picking which view gets shown, or how it's organized, from settings written at the top of a file is planned but not built yet. Right now both views are always rendered together on the same page.
 
 # How to use it
 
@@ -42,15 +42,37 @@ Compile the project. This produces an executable named jml (jml.exe on Windows).
 jml.exe notes.jml
 ```
 
-This reads notes.jml, organizes the notes, writes the result to output.html, and opens it in your default browser automatically. Each tag section is collapsible, click it to expand or hide its contents. 
+This reads notes.jml, organizes the notes, writes the result to output.html, and opens it in your default browser automatically. Each tag section is collapsible, click it to expand or hide its contents.
 
 Running it by name from any folder currently requires adding it to your PATH environment variable yourself. An installer that does this automatically is planned but not built yet.
 
+# Settings at the top of a file
+
+A file can start with lines that begin with #, each one setting an option in the form #key:value. These lines come before any notes and are not treated as notes themselves.
+
+```
+#view:tree
+#sort:chronological
+Buy milk @shopping@walmart
+Finish the report @todo@work
+```
+
+view chooses which organization to use for the whole file:
+- flat (the default if not set)
+- tree
+
+sort chooses the order notes and groups appear in:
+- alphabetical (the default if not set)
+- chronological, meaning the order the notes were originally written in the file
+
+If a setting is left out, or the value isn't recognized, the default is used instead.
+
 # How organization works
 
-Right now the program builds two different views of your notes from the same file, and shows both.
+Flat view: every tag becomes its own group. If a note has more than one tag, only the first one is used to decide where it goes. Notes with no tag at all go into a group called "misc", always shown last regardless of sort order.
 
-Flat view: every tag becomes its own group. If a note has more than one tag, only the first one is used to decide where it goes. Notes with no tag at all go into a group called "misc" at the end. Groups are shown alphabetically.
+Tree view: tags are nested inside each other based on the order you wrote them. The first tag on a note is treated as the outer, more general one, and each tag after it is nested one level deeper, inside the one before it. For example, a note written as @shopping@walmart puts it under shopping, and inside that, under walmart. If two notes share the same tag at the same level, they get combined into one branch instead of showing up twice. A tag can have both its own notes and further tags nested under it at the same time. Notes with no tag at all sit at the very top level, not nested under anything (this will be subject to change due to the fact that it's a horrible design choice). The order tags are written in matters, @shopping@walmart and @walmart@shopping are treated as two different, unrelated branches.
 
-Tree view: tags are nested inside each other based on the order you wrote them. The first tag on a note is treated as the outer, more general one, and each tag after it is nested one level deeper, inside the one before it. For example, a note written as @shopping@walmart puts it under shopping, and inside that, under walmart. If two notes share the same tag at the same level, they get combined into one branch instead of showing up twice. A tag can have both its own notes and further tags nested under it at the same time. Notes with no tag at all sit at the very top level, not nested under anything (This will be subject to change due to the fact that its a horrible design choice). The order tags are written in matters, @shopping@walmart and @walmart@shopping are treated as two different, unrelated branches.
+Alphabetical sorting orders tags and notes by their text, in both views.
 
+Chronological sorting orders tags and notes by when they were first written in the file. In the tree view, a tag's position is decided by whichever note under it, at any depth, was written earliest.

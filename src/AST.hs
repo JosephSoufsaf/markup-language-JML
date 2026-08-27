@@ -11,7 +11,7 @@ data Note = Note Content [Tag]
     deriving (Show, Eq)
 
 data Content = Content Int String
-    deriving (Show, Eq)
+    deriving (Show)
 
 data Tag = Tag String
     deriving (Show, Eq, Ord)
@@ -23,6 +23,11 @@ data DocTree = TagNode Tag [DocTree]  | ContentNode Content
     deriving (Show, Eq)
 
 
+instance Eq Content where
+    (Content idx1 _) == (Content idx2 _) = idx1 == idx2
+
+instance Ord Content where
+    (Content idx1 _) <= (Content idx2 _) = idx1 <= idx2
 
 
 

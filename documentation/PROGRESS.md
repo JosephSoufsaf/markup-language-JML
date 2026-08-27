@@ -38,13 +38,14 @@
   
 - implement sorting functions to sort alphabetically
  
-
-## Next
-  
 - Decide what should happen when a line is only a tag with no actual text before it, like "@shopping" with nothing written first. Right now this creates a note with empty content, which shows up as a blank line in the page. Need to decide: skip it, warn about it, or treat it some other way.
 
+## Next
+
+- finish adding chronological sorting to Tree view and flat view.
+
 - Brainstorm new ways to render the notes besides html 
-  
+- 
 - Make the rendered output.html file have a better style
 
 

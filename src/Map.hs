@@ -1,3 +1,8 @@
+module Map where
+import AST
+import qualified Data.Map as Map
+import Data.Map (Map)
+import Data.List (sort)
 -- General result of Parser.hs
 -- Document [Note (Content 0 "Buy milk ") [Tag "shopping"], Note (Content 1 "Finish JML parser ") [Tag "todo"]]
 
@@ -65,11 +70,6 @@ sortMiscLast pairs = filter notMisc pairs ++ filter isMisc pairs
     isMisc _ = False
     notMisc pair = not (isMisc pair)
   
-instance Eq Content where
-    (Content idx1 _) == (Content idx2 _) = idx1 == idx2
-
-instance Ord Content where
-    (Content idx1 _) <= (Content idx2 _) = idx1 <= idx2
 
 sortChrono :: [(Tag, [Content])] -> [(Tag, [Content])]
 sortChrono [] = []

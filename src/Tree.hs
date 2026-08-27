@@ -1,7 +1,7 @@
 module Tree (insertTag, mergeTag, buildTree, sortTreeAlphabetical) where
 
 import AST
-import Organizer
+import Map
 import Data.List (sortBy)
 import Data.Ord (comparing)
 
@@ -9,19 +9,19 @@ import Data.Ord (comparing)
 -- Input:  insertTag [Tag "shopping", Tag "walmart"] (Content "Buy milk") []
 -- Output: [TagNode (Tag "shopping") [TagNode (Tag "walmart") [ContentNode (Content "Buy milk")]]]
 insertTag :: [Tag] -> Content -> [DocTree] -> [DocTree]
-insertTag [] content tree = ContentNode index content : tree
+insertTag [] content tree = ContentNode content  : tree
 insertTag (x:xs) content tree = mergeTag (TagNode x (insertTag xs content [])) tree
 
 mergeChildren :: [DocTree] -> [DocTree] -> [DocTree]
 mergeChildren newChildren existingChildren = foldr mergeTag existingChildren newChildren
 
 mergeTag :: DocTree -> [DocTree] -> [DocTree]
-mergeTag (ContentNode content) siblings = (ContentNode index content) : siblings
+mergeTag (ContentNode content) siblings = (ContentNode content) : siblings
 mergeTag tag [] = [tag]
 mergeTag (TagNode tag children) ((TagNode tagValue kids) : xs)
     | tag == tagValue = (TagNode tagValue (mergeChildren children kids)) : xs
     | otherwise = (TagNode tagValue kids) : mergeTag (TagNode tag children) xs
-mergeTag tag (ContentNode index content : xs) = (ContentNode index content) : (mergeTag tag xs)
+mergeTag tag ((ContentNode content) : xs) = (ContentNode content) : (mergeTag tag xs)
 
 
 
@@ -52,7 +52,7 @@ buildTree (n:ns) =
 
 extractString :: DocTree -> String
 extractString (TagNode (Tag name) _) = name
-extractString (ContentNode (Content text)) = text
+extractString (ContentNode (Content _ text)) = text
 
 sortTreeAlphabetical :: [DocTree] -> [DocTree]
 sortTreeAlphabetical trees = map sortChildren (sortBy (comparing extractString) trees)

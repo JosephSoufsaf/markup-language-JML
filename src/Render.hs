@@ -4,7 +4,7 @@ module Render where
 
 import Lucid
 import AST
-import Organizer
+import Map
 
 -- Example input:  [(Tag "shopping", [Content "Buy milk"]), (Tag "todo", [Content "Finish JML parser"])]
 -- Example output: <details><summary>shopping</summary><p>Buy milk</p></details><details><summary>todo</summary><p>Finish JML parser</p></details>
@@ -16,7 +16,7 @@ renderNote ((Tag tag, contents) : xs) = details_ (summary_ (toHtml tag) <> rende
     -- Example output: <p>Buy milk</p><p>Buy eggs</p>
     renderContent :: [Content] -> Html ()
     renderContent [] = mempty
-    renderContent (Content content : xs) = p_ (toHtml content) <> renderContent xs
+    renderContent (Content _ content : xs) = p_ (toHtml content) <> renderContent xs
 
 renderTree :: [DocTree] -> Html ()
 renderTree [] = mempty
@@ -24,7 +24,7 @@ renderTree trees = mapM_ renderNode trees
   where
     renderNode :: DocTree -> Html ()
     renderNode (TagNode (Tag name) children) = details_ (summary_ (toHtml name) <> renderTree children)
-    renderNode (ContentNode (Content text)) = p_ (toHtml text)
+    renderNode (ContentNode (Content _ text)) = p_ (toHtml text)
 
 
 

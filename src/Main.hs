@@ -5,7 +5,7 @@ import System.Process (callCommand)
 import Lucid (renderToFile, style_, toHtml, Html)
 import Parser
 import AST
-import Organizer
+import Map
 import Tree
 import Render
 import qualified Data.Map as Map
