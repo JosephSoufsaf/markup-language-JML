@@ -1,7 +1,7 @@
 module Tree (insertTag, mergeTag, buildTree, sortTreeAlphabetical) where
 
 import AST
-import Map
+import Organizer
 import Data.List (sortBy)
 import Data.Ord (comparing)
 
@@ -12,16 +12,13 @@ insertTag :: [Tag] -> Content -> [DocTree] -> [DocTree]
 insertTag [] content tree = ContentNode content  : tree
 insertTag (x:xs) content tree = mergeTag (TagNode x (insertTag xs content [])) tree
 
-mergeChildren :: [DocTree] -> [DocTree] -> [DocTree]
-mergeChildren newChildren existingChildren = foldr mergeTag existingChildren newChildren
-
 mergeTag :: DocTree -> [DocTree] -> [DocTree]
-mergeTag (ContentNode content) siblings = (ContentNode content) : siblings
+mergeTag (ContentNode content) siblings = ContentNode content : siblings
 mergeTag tag [] = [tag]
 mergeTag (TagNode tag children) ((TagNode tagValue kids) : xs)
-    | tag == tagValue = (TagNode tagValue (mergeChildren children kids)) : xs
-    | otherwise = (TagNode tagValue kids) : mergeTag (TagNode tag children) xs
-mergeTag tag ((ContentNode content) : xs) = (ContentNode content) : (mergeTag tag xs)
+    | tag == tagValue = TagNode tagValue (foldr mergeTag kids children) : xs
+    | otherwise = TagNode tagValue kids : mergeTag (TagNode tag children) xs
+mergeTag tag (ContentNode content : xs) = ContentNode content : mergeTag tag xs
 
 
 
@@ -36,7 +33,7 @@ mergeTag tag ((ContentNode content) : xs) = (ContentNode content) : (mergeTag ta
 -- Example 3
 -- Input:  [Note (Content "Buy milk") [Tag "shopping"], Note (Content "No tag here") []]
 -- Output: [ContentNode (Content "No tag here"), TagNode (Tag "shopping") [ContentNode (Content "Buy milk")]]
-
+     
 
 -- Example 4
 -- Input:  [Note (Content "Buy milk") [Tag "shopping"], Note (Content "Finish parser") [Tag "todo"]]
@@ -60,13 +57,4 @@ sortTreeAlphabetical trees = map sortChildren (sortBy (comparing extractString) 
     sortChildren :: DocTree -> DocTree
     sortChildren (TagNode tag children) = TagNode tag (sortTreeAlphabetical children)
     sortChildren leaf = leaf
-
-
-
-
-
-
-
-
-
 

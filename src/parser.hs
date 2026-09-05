@@ -1,6 +1,7 @@
 module Parser where
 import AST
 import qualified Data.Map as Map
+import qualified Data.Stack as Stack
 
 
 
@@ -27,7 +28,6 @@ splitLines str = firstLine str : splitLines (remainingLines str) where
         | x == '\n' = []
         | otherwise = x : firstLine xs
 
-
 -- Example input:  ["Buy milk @shopping", "", "No tag here", ""]
 -- Example output: ["Buy milk @shopping", "No tag here"]
 removeEmptyLines :: [String] -> [String]
@@ -37,6 +37,28 @@ removeEmptyLines (x:xs)
     | otherwise = x : removeEmptyLines xs
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
+
+
+--------------  START OF DRAWING SECTIONS --------------
+
+-- Example input:  ["Buy milk @shopping", "/* whatever this is */", "No tag here"]
+-- Example output ["/* whatever this is */"]
+filterDrawings :: [String] -> [String]
+filterDrawings [] = []
+filterDrawings (x:xs)
+    | containsDrawing x = x : filterDrawings xs
+    | otherwise = filterDrawings xs where
+        containsDrawing :: String -> Bool
+        containsDrawing [] = False
+        containsDrawing (x:xs)
+            | x == '/' = True
+            | otherwise = containsDrawing xs
+
+removeIndicators :: String -> String
+removeIndicators [] = []
+removeIndicators string = filter (`notElem` "/*") string
+
+--------------  END OF DRAWING SECTIONS --------------
 
 
 -------------- START OF HEADER FUNCTIONS --------------
@@ -118,9 +140,12 @@ assignIndex lines = (zip [0..] lines)
 
 -------------- START OF PARSING FUNCTIONS --------------
 
+
+
 -- Example Input: (0, "Buy milk @shopping")
 -- Example Output: Content 0 "Buy milk "
 parseContent :: (Int, String) -> Content
+parseContent (index, line) = Drawing index (getContentString line)
 parseContent (index, line) = Content index (getContentString line) where
     -- Example Input: "Buy milk @shopping"
     -- Example Output: "Buy milk "
@@ -129,6 +154,8 @@ parseContent (index, line) = Content index (getContentString line) where
     getContentString (x:xs) 
         | x == '@' = []
         | otherwise = x : getContentString xs
+
+
 
 
 -- Example input:  "Buy milk @shopping@walmart"

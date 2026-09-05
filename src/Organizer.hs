@@ -1,4 +1,4 @@
-module Map where
+module Organizer (getNotes, getContent, getTag, getTags, singleTagSorting, notesToPairs, sortMiscLast, sortChrono) where
 import AST
 import qualified Data.Map as Map
 import Data.Map (Map)
@@ -70,10 +70,6 @@ sortMiscLast pairs = filter notMisc pairs ++ filter isMisc pairs
     isMisc _ = False
     notMisc pair = not (isMisc pair)
   
-
-sortChrono :: [(Tag, [Content])] -> [(Tag, [Content])]
-sortChrono [] = []
-sortChrono ((tag, contents):xs) = (tag, sort contents) : sortChrono xs
 
 
 
