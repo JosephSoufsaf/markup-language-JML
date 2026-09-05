@@ -4,7 +4,7 @@ module Render where
 
 import Lucid
 import AST
-import Map
+import Organizer
 
 -- Example input:  [(Tag "shopping", [Content "Buy milk"]), (Tag "todo", [Content "Finish JML parser"])]
 -- Example output: <details><summary>shopping</summary><p>Buy milk</p></details><details><summary>todo</summary><p>Finish JML parser</p></details>

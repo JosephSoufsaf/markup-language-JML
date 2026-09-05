@@ -1,6 +1,7 @@
 module Parser where
 import AST
 import qualified Data.Map as Map
+import Data.List (isInfixOf)
 
 
 
@@ -117,18 +118,40 @@ assignIndex lines = (zip [0..] lines)
 
 
 -------------- START OF PARSING FUNCTIONS --------------
-
 -- Example Input: (0, "Buy milk @shopping")
 -- Example Output: Content 0 "Buy milk "
+
+-- if it is a drawing section then I have to say its a drawing so the
+-- functions know how to render it
 parseContent :: (Int, String) -> Content
-parseContent (index, line) = Content index (getContentString line) where
-    -- Example Input: "Buy milk @shopping"
-    -- Example Output: "Buy milk "
-    getContentString :: String -> String 
-    getContentString [] = []
-    getContentString (x:xs) 
-        | x == '@' = []
-        | otherwise = x : getContentString xs
+parseContent (index, line)
+    | ("/*" `isInfixOf` line) && ("*/" `isInfixOf` line) = Drawing index (getContentString line)
+    | otherwise = Content index (getContentString line) where
+        getContentString :: String -> String 
+        getContentString [] = []
+        getContentString (x:xs) 
+            | x == '@' = []
+            | otherwise = x : getContentString xs
+
+
+
+removeFirstDelimiters :: String -> String
+removeFirstDelimiters [] = []
+removeFirstDelimiters ('/':'*':xs) = xs
+removeFirstDelimiters xs = xs
+
+removeDelimiters :: String -> String
+removeDelimiters string =
+    reverse (removeFirstDelimiters (reverse (removeFirstDelimiters string)))
+
+
+
+
+
+
+
+
+
 
 
 -- Example input:  "Buy milk @shopping@walmart"

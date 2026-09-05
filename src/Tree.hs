@@ -1,7 +1,7 @@
 module Tree (insertTag, mergeTag, buildTree, sortTreeAlphabetical) where
 
 import AST
-import Map
+import Organizer
 import Data.List (sortBy)
 import Data.Ord (comparing)
 

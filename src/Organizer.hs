@@ -1,4 +1,4 @@
-module Map where
+module Organizer where
 import AST
 import qualified Data.Map as Map
 import Data.Map (Map)
