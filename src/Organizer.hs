@@ -71,10 +71,6 @@ sortMiscLast pairs = filter notMisc pairs ++ filter isMisc pairs
     notMisc pair = not (isMisc pair)
   
 
-sortChrono :: [(Tag, [Content])] -> [(Tag, [Content])]
-sortChrono [] = []
-sortChrono ((tag, contents):xs) = (tag, sort contents) : sortChrono xs
-
 
 
 
