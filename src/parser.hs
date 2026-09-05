@@ -125,7 +125,7 @@ assignIndex lines = (zip [0..] lines)
 -- functions know how to render it
 parseContent :: (Int, String) -> Content
 parseContent (index, line)
-    | ("/*" `isInfixOf` line) && ("*/" `isInfixOf` line) = Drawing index (getContentString line)
+    | ("/*" `isInfixOf` line) && ("*/" `isInfixOf` line) = Drawing index (removeDelimiters (getContentString line))
     | otherwise = Content index (getContentString line) where
         getContentString :: String -> String 
         getContentString [] = []
