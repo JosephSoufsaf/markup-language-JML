@@ -24,6 +24,8 @@ It follows the usual markup language structure.
 - Renders the view directly to HTML with Haskell, no intermediate file or second language involved.
 - The main program opens the rendered HTML file in the browser.
 
+AST -> Parser -> Organizer/Tree -> Tree -> Main
+
 # How to use it
 
 Write a plain text file with one note per line. Add a tag to a note by writing @ followed by the tag name, right after the note's text. A note can have more than one tag by writing more @tags right after each other, with no space between them. A note with no @ at all is untagged.
@@ -76,3 +78,7 @@ Tree view: tags are nested inside each other based on the order you wrote them. 
 Alphabetical sorting orders tags and notes by their text, in both views.
 
 Chronological sorting orders tags and notes by when they were first written in the file. In the tree view, a tag's position is decided by whichever note under it, at any depth, was written earliest.
+
+# Drawing (Sort of but not really)
+
+Mermaid is in progress of being integrated. The tool mermaid will be used to let users to create charts and diagrams. It will use Mermaid source.  

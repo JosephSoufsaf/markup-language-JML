@@ -1,12 +1,5 @@
 module AST (Note(..), Content(..), Tag(..), Document(..), DocTree(..)) where
 
-
--- data Group = Group Tag [Content]
---     deriving Show
-
--- data GroupDocument = GroupDocument [Group]
---     deriving Show
-
 data Note = Note Content [Tag]
     deriving (Show, Eq)
 
@@ -22,9 +15,21 @@ data Document = Document [Note]
 data DocTree = TagNode Tag [DocTree]  | ContentNode Content
     deriving (Show, Eq)
 
-
 instance Eq Content where
+    (Drawing idx1 _) == (Drawing idx2 _) = idx1 == idx2
     (Content idx1 _) == (Content idx2 _) = idx1 == idx2
+    _ == _ = False
 
 instance Ord Content where
     (Content idx1 _) <= (Content idx2 _) = idx1 <= idx2
+    (Drawing idx1 _) <= (Drawing idx2 _) = idx1 <= idx2
+
+
+
+
+
+
+
+
+
+
