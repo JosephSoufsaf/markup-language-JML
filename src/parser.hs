@@ -133,24 +133,12 @@ parseContent (index, line)
             | x == '@' = []
             | otherwise = x : getContentString xs
 
-
-
-removeFirstDelimiters :: String -> String
-removeFirstDelimiters [] = []
-removeFirstDelimiters ('/':'*':xs) = xs
-removeFirstDelimiters xs = xs
-
 removeDelimiters :: String -> String
-removeDelimiters string =
-    reverse (removeFirstDelimiters (reverse (removeFirstDelimiters string)))
-
-
-
-
-
-
-
-
+removeDelimiters string = reverse (removeFirstDelimiters (reverse (removeFirstDelimiters string))) where
+    removeFirstDelimiters :: String -> String
+    removeFirstDelimiters [] = []
+    removeFirstDelimiters ('/':'*':xs) = xs
+    removeFirstDelimiters xs = xs
 
 
 
