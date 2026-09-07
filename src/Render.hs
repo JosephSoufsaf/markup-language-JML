@@ -59,7 +59,6 @@ renderTree trees = mapM_ renderTop trees
 renderItalic :: StyledText -> Html()
 renderItalic (Italic string) = em_ (toHtml string)
 
-
 renderBold :: StyledText -> Html()
 renderBold (Bold string) = strong_ (toHtml string)
 

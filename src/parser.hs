@@ -4,7 +4,6 @@ import qualified Data.Map as Map
 import Data.List (isInfixOf)
 
 
-
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
 -- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here"
 -- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
@@ -38,6 +37,7 @@ removeEmptyLines (x:xs)
     | otherwise = x : removeEmptyLines xs
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
+
 
 
 -------------- START OF HEADER FUNCTIONS --------------
@@ -108,6 +108,8 @@ findSortValue (line:rest)
 -------------- END OF HEADER FUNCTIONS --------------
 
 
+
+
 -------------- START OF INDEX ASSIGNING FUNCTIONS --------------
 -- Example Input: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: [(0, "Buy milk @shopping"), (1, "Finish JML parser @todo"), (2, "No tag here")]
@@ -133,13 +135,41 @@ parseContent (index, line)
             | x == '@' = []
             | otherwise = x : getContentString xs
 
+
+{- -- Example input "*Hello*"
+-- Example output True
+-- Example input "**Hello**"
+-- Example output True
+-- Example input "*hello" 
+-- Example output False
+-- Example input "** hello"
+-- Example output False  -}
+verifyFormattingComplete :: String -> Bool
+verifyFormattingComplete string = verifyFirstFormatting string && verifyFirstFormatting (reverse string) where
+    verifyFirstFormatting :: String -> Bool
+    verifyFirstFormatting ('*':'*':xs) = True
+    verifyFirstFormatting ('*':xs) = True
+    verifyFirstFormatting _ = False
+
+removeFirstFormattingDelimiters :: String -> String
+removeFirstFormattingDelimiters [] = []
+removeFirstFormattingDelimiters ('*':xs) = xs
+
+-- Example input "*hello*"
+-- Example output "hello"
+formattingDelimiters :: String -> StyledText
+formattingDelimiters ('*':'*':xs) = Bold (reverse (removeFirstFormattingDelimiters (reverse (removeFirstFormattingDelimiters xs))))
+formattingDelimiters ('*':xs) = Italic (reverse (removeFirstFormattingDelimiters (reverse (removeFirstFormattingDelimiters xs))))
+    
+
+-- Example input "/*hello*/"
+-- Example output "hello"
 removeDelimiters :: String -> String
 removeDelimiters string = reverse (removeFirstDelimiters (reverse (removeFirstDelimiters string))) where
     removeFirstDelimiters :: String -> String
     removeFirstDelimiters [] = []
     removeFirstDelimiters ('/':'*':xs) = xs
     removeFirstDelimiters xs = xs
-
 
 
 -- Example input:  "Buy milk @shopping@walmart"
