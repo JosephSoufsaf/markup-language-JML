@@ -9,7 +9,7 @@ import Data.Ord (comparing)
 -- Input:  insertTag [Tag "shopping", Tag "walmart"] (Content "Buy milk") []
 -- Output: [TagNode (Tag "shopping") [TagNode (Tag "walmart") [ContentNode (Content "Buy milk")]]]
 insertTag :: [Tag] -> Content -> [DocTree] -> [DocTree]
-insertTag [] content tree = ContentNode content  : tree
+insertTag [] content tree = ContentNode content : tree
 insertTag (x:xs) content tree = mergeTag (TagNode x (insertTag xs content [])) tree
 
 mergeTag :: DocTree -> [DocTree] -> [DocTree]
