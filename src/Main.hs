@@ -38,11 +38,11 @@ main = do
                     let sortedTree = if sortChoice == "alphabetical"
                                         then sortTreeAlphabetical builtTree
                                         else builtTree
-                    renderToFile outputFile (defaultStyle <> renderTree sortedTree)
+                    renderToFile outputFile (defaultStyle <> mermaidScript <> renderTree sortedTree)
                 else do
                     let grouped = singleTagSorting (notesToPairs notes)
-                    let flatHtml = renderNote (sortMiscLast (Map.toList grouped))
-                    renderToFile outputFile (defaultStyle <> flatHtml)
+                    let flatHtml = renderMap (sortMiscLast (Map.toList grouped))
+                    renderToFile outputFile (defaultStyle <> mermaidScript <> flatHtml)
 
             callCommand ("start " ++ outputFile)
         _ -> putStrLn "Usage: jml <path-to-.jml-file>"

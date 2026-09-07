@@ -15,6 +15,8 @@ data Document = Document [Note]
 data DocTree = TagNode Tag [DocTree]  | ContentNode Content
     deriving (Show, Eq)
 
+
+
 instance Eq Content where
     (Drawing idx1 _) == (Drawing idx2 _) = idx1 == idx2
     (Content idx1 _) == (Content idx2 _) = idx1 == idx2
