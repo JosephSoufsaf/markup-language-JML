@@ -3,7 +3,7 @@ module AST (Note(..), Content(..), Tag(..), Document(..), DocTree(..)) where
 data Note = Note Content [Tag]
     deriving (Show, Eq)
 
-data Content = Content Int String | Drawing Int String
+data Content = Content Int [StyledText] | Drawing Int String
     deriving (Show)
 
 data Tag = Tag String
@@ -14,6 +14,9 @@ data Document = Document [Note]
 
 data DocTree = TagNode Tag [DocTree]  | ContentNode Content
     deriving (Show, Eq)
+
+data StyledText = Italic String | Bold String | Plain String
+
 
 instance Eq Content where
     (Drawing idx1 _) == (Drawing idx2 _) = idx1 == idx2

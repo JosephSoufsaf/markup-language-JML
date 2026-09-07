@@ -54,3 +54,14 @@ renderTree trees = mapM_ renderTop trees
         details_ (summary_ (toHtml name) <> renderNested children)
     renderNode (ContentNode (Content _ text)) = p_ (toHtml text)
     renderNode (ContentNode (Drawing _ text)) = pre_ [class_ "mermaid"] (toHtml text)
+
+
+renderItalic :: StyledText -> Html()
+renderItalic (Italic string) = em_ (toHtml string)
+
+
+renderBold :: StyledText -> Html()
+renderBold (Bold string) = strong_ (toHtml string)
+
+renderPlain :: StyledText -> Html ()
+renderPlain (Plain string) = (toHtml string)
