@@ -14,8 +14,9 @@ splitLines str = lines str
 
 
 removeEmptyLines :: [String] -> [String]
-removeEmptyLines list = filter (not . null) list
-
+removeEmptyLines sentences = filter (not . isBlank) sentences where
+    isBlank :: String -> Bool
+    isBlank = null . dropWhile isSpace
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
 
@@ -24,18 +25,9 @@ removeEmptyLines list = filter (not . null) list
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 removeHeaders :: [String] -> [String]
-removeHeaders sentences = removeHeaders (filter (containsHeader sentence) (x:xs) )
-
-removeHeaders ::  [String] -> [String]
-removeHeaders [] = []
-removeHeaders (x:xs)
-    | containsHeader x = removeHeaders xs
-    | otherwise = x : removeHeaders xs
-
--- Example Input: "#view:tree"
--- Example Output: True
--- Example Input: "Buy milk @shopping"
--- Example Output: False
+removeHeaders sentences = filter ( not . containsHeader) sentences
+    
+    
 containsHeader :: String -> Bool
 containsHeader [] = False
 containsHeader (x:xs)
