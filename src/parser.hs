@@ -2,6 +2,8 @@ module Parser where
 import AST
 import qualified Data.Map as Map
 import Data.List (isInfixOf)
+import Data.String
+
 
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
@@ -135,6 +137,17 @@ parseContent (index, line)
             | x == '@' = []
             | otherwise = x : getContentString xs
 
+*hello*
+seperateString :: String -> [StyledText]
+seperateString "*" = ""
+seperateString [] = []
+seperateString (x:xs)
+    | x == '*' = seperateString xs 
+    | otherwise = x : seperateString xs
+
+
+
+
 
 {- -- Example input "*Hello*"
 -- Example output True
@@ -246,4 +259,4 @@ parseNotes (x:xs) = parseNote x : parseNotes xs
 parseDocument :: String -> Document
 parseDocument documentContent = Document (parseNotes (assignIndex (removeHeaders (removeEmptyLines (splitLines documentContent)))))
 
--------------- END OF PARSING FUNCTIONS --------------
+-------------- END OF PARSING FUNCTIONS --------------2

@@ -51,4 +51,5 @@
 - Should try to add a way to easily create graph drawings for making figures easily 
 
 - add a way to like make a bunch of notes go under one tag with the same sort of syntax as a comment
-- 
+  
+- Add a way to link different files. To create links
