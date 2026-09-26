@@ -10,33 +10,11 @@ import Data.String
 -- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here"
 -- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 splitLines :: String -> [String]
-splitLines [] = []
-splitLines str = firstLine str : splitLines (remainingLines str) where 
-    
-    -- Example input: "Buy milk @shopping\nFinish JML parser @todo" 
-    -- Example output: "Finish JML parser @todo"
-    remainingLines :: String -> String
-    remainingLines [] =[]
-    remainingLines (x:xs) 
-        | x == '\n' = xs
-        | otherwise = remainingLines xs
-
-    -- Example input: "Buy milk @shopping\nFinish JML parser @todo"
-    -- Example output: "Buy milk @shopping"
-    firstLine :: String -> String
-    firstLine  [] = []
-    firstLine  (x:xs) 
-        | x == '\n' = []
-        | otherwise = x : firstLine xs
+splitLines str = lines str
 
 
--- Example input:  ["Buy milk @shopping", "", "No tag here", ""]
--- Example output: ["Buy milk @shopping", "No tag here"]
 removeEmptyLines :: [String] -> [String]
-removeEmptyLines [] = []
-removeEmptyLines (x:xs)
-    | x == "" = removeEmptyLines xs
-    | otherwise = x : removeEmptyLines xs
+removeEmptyLines list = filter (not . null) list
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
@@ -45,6 +23,9 @@ removeEmptyLines (x:xs)
 -------------- START OF HEADER FUNCTIONS --------------
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
+removeHeaders :: [String] -> [String]
+removeHeaders sentences = removeHeaders (filter (containsHeader sentence) (x:xs) )
+
 removeHeaders ::  [String] -> [String]
 removeHeaders [] = []
 removeHeaders (x:xs)
@@ -137,7 +118,6 @@ parseContent (index, line)
             | x == '@' = []
             | otherwise = x : getContentString xs
 
-*hello*
 seperateString :: String -> [StyledText]
 seperateString "*" = ""
 seperateString [] = []

@@ -52,7 +52,7 @@ renderTree trees = mapM_ renderTop trees
     renderNode :: DocTree -> Html ()
     renderNode (TagNode (Tag name) children) =
         details_ (summary_ (toHtml name) <> renderNested children)
-    renderNode (ContentNode (Content _ text)) = p_ (toHtml text)
+    renderNode (ContentNode (Content _ text)) = p_ (toHtml text)1
     renderNode (ContentNode (Drawing _ text)) = pre_ [class_ "mermaid"] (toHtml text)
 
 
