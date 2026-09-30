@@ -91,11 +91,12 @@ parseContent :: (Int, String) -> Content
 parseContent (index, line)
     | ("/*" `isInfixOf` line) && ("*/" `isInfixOf` line) = Drawing index (removeDelimiters (getContentString line))
     | otherwise = Content index (getContentString line) where
+
         getContentString :: String -> String 
         getContentString [] = []
-        getContentString (x:xs) 
-            | x == '@' = []
-            | otherwise = x : getContentString xs
+        getContentString ('@':_) = []
+        getContentString (x:xs) = x : getContentString xs
+
 
 seperateString :: String -> [StyledText]
 seperateString "*" = ""
@@ -103,8 +104,6 @@ seperateString [] = []
 seperateString (x:xs)
     | x == '*' = seperateString xs 
     | otherwise = x : seperateString xs
-
-
 
 
 
