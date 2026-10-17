@@ -3,7 +3,7 @@ import AST
 import qualified Data.Map as Map
 import Data.List (isInfixOf)
 import Data.String
-
+import Data.Bifunctor (second)
 
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
@@ -15,9 +15,7 @@ splitLines str = lines str
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "      "]
 -- Example Output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 removeEmptyLines :: [String] -> [String]
-removeEmptyLines sentences = filter (not . isBlank) sentences where
-    isBlank :: String -> Bool
-    isBlank = null . dropWhile isSpace
+removeEmptyLines :: filter (not . all isSpace)
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
@@ -40,6 +38,7 @@ containsHeader string = elem '#' string
 -- Example Output: ["#view:tree"]
 getHeaders :: [String] -> [String]
 getHeaders list = filter validateFormatHeader list where
+
     -- Example Input: "#view:tree"
     -- Example output: True
     -- This function verifies that the format of a header is valid
@@ -51,7 +50,14 @@ getHeaders list = filter validateFormatHeader list where
             otherwise -> False
     validateHeaderFormat _ = False
 
+-- Example Input : "#view:tree"
+-- Example Output: ("view", "tree")
+identifyHeaders :: String -> (String, String)
+identifyHeaders ('#':rest) = identifyHeaders rest
+identifyHeaders header = second (drop 1) (break (== ':') header)
 
+{-
+Kept in case needed
 -- Example Input: "#view:tree"
 -- Example Output: "view"
 getKey :: String -> String
@@ -66,6 +72,9 @@ getValue :: String -> String
 getValue []       = []
 getValue (':':xs) = xs
 getValue (_:xs)   = getValue xs
+-}
+
+
 
 
 -------------- END OF HEADER FUNCTIONS --------------
