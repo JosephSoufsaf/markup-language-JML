@@ -12,11 +12,26 @@ data Tag = Tag String
 data Document = Document [Note]
     deriving (Show, Eq)
 
-data DocTree = TagNode Tag [DocTree]  | ContentNode Content
+data DocTree = TagNode Tag [DocTree] | ContentNode Content
     deriving (Show, Eq)
 
 data StyledText = Italic String | Bold String | Plain String
     deriving (Show)
+
+contentIndex :: Content -> Int
+contentIndex (Content idx _) = idx
+contentIndex (Drawing idx _) = idx
+
+plainText :: [StyledText] -> String
+plainText = concatMap flatten
+  where
+    flatten (Italic s) = s
+    flatten (Bold s)   = s
+    flatten (Plain s)  = s
+
+contentText :: Content -> String
+contentText (Content _ styled) = plainText styled
+contentText (Drawing _ s)      = s
 
 instance Eq Content where
     (Drawing idx1 _) == (Drawing idx2 _) = idx1 == idx2
@@ -24,15 +39,4 @@ instance Eq Content where
     _ == _ = False
 
 instance Ord Content where
-    (Content idx1 _) <= (Content idx2 _) = idx1 <= idx2
-    (Drawing idx1 _) <= (Drawing idx2 _) = idx1 <= idx2
-
-
-
-
-
-
-
-
-
-
+    compare a b = compare (contentIndex a) (contentIndex b)

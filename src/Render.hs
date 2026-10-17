@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Render (renderMap, renderTree, defaultStyle, mermaidScript) where
+module Render (renderMap, renderTree, renderPage, defaultStyle, mermaidScript) where
 
 import Lucid
 import AST
-import Organizer
 import Data.Text (Text)
 
 defaultStyle :: Html ()
@@ -27,24 +26,40 @@ mermaidScript = do
     script_ [src_ "https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"] ("" :: Text)
     script_ ("mermaid.initialize({ startOnLoad: true, theme: 'dark' });" :: Text)
 
-renderMap :: [(Tag, [Content])] -> Html ()
-renderMap [] = mempty
-renderMap ((Tag tag, contents) : xs) =
-    details_ [open_ "open"] (summary_ (toHtml tag) <> renderContent contents) <> renderMap xs
+-- Wraps the body in a complete HTML document.
+renderPage :: Html () -> Html ()
+renderPage body = doctypehtml_ $ do
+    head_ $ do
+        meta_ [charset_ "UTF-8"]
+        title_ "Notes"
+        defaultStyle
+        mermaidScript
+    body_ body
+
+renderStyled :: [StyledText] -> Html ()
+renderStyled = mapM_ renderOne
   where
-    renderContent :: [Content] -> Html ()
-    renderContent [] = mempty
-    renderContent (Content _ text : rest) = p_ (toHtml text) <> renderContent rest
-    renderContent (Drawing _ text : rest) = pre_ [class_ "mermaid"] (toHtml text) <> renderContent rest
+    renderOne (Italic s) = em_ (toHtml s)
+    renderOne (Bold s)   = strong_ (toHtml s)
+    renderOne (Plain s)  = toHtml s
+
+renderContent :: Content -> Html ()
+renderContent (Content _ styled) = p_ (renderStyled styled)
+renderContent (Drawing _ text)   = pre_ [class_ "mermaid"] (toHtml text)
+
+renderMap :: [(Tag, [Content])] -> Html ()
+renderMap = mapM_ renderGroup
+  where
+    renderGroup (Tag tag, contents) =
+        details_ [open_ "open"] (summary_ (toHtml tag) <> mapM_ renderContent contents)
 
 renderTree :: [DocTree] -> Html ()
-renderTree trees = mapM_ renderTop trees
+renderTree = mapM_ renderTop
   where
     renderTop :: DocTree -> Html ()
     renderTop (TagNode (Tag name) children) =
         details_ [open_ "open"] (summary_ (toHtml name) <> renderNested children)
-    renderTop (ContentNode (Content _ text)) = p_ (toHtml text)
-    renderTop (ContentNode (Drawing _ text)) = pre_ [class_ "mermaid"] (toHtml text)
+    renderTop (ContentNode content) = renderContent content
 
     renderNested :: [DocTree] -> Html ()
     renderNested = mapM_ renderNode
@@ -52,15 +67,4 @@ renderTree trees = mapM_ renderTop trees
     renderNode :: DocTree -> Html ()
     renderNode (TagNode (Tag name) children) =
         details_ (summary_ (toHtml name) <> renderNested children)
-    renderNode (ContentNode (Content _ text)) = p_ (toHtml text)1
-    renderNode (ContentNode (Drawing _ text)) = pre_ [class_ "mermaid"] (toHtml text)
-
-
-renderItalic :: StyledText -> Html()
-renderItalic (Italic string) = em_ (toHtml string)
-
-renderBold :: StyledText -> Html()
-renderBold (Bold string) = strong_ (toHtml string)
-
-renderPlain :: StyledText -> Html ()
-renderPlain (Plain string) = (toHtml string)
+    renderNode (ContentNode content) = renderContent content
