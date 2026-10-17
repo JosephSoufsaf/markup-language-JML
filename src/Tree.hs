@@ -1,4 +1,4 @@
-module Tree (insertTag, mergeTag, buildTree, sortTreeAlphabetical) where
+module Tree (insertTag, mergeTag, buildTree, sortTreeAlphabetical, sortTreeChronological) where
 
 import AST
 import Organizer
@@ -6,8 +6,8 @@ import Data.List (sortBy)
 import Data.Ord (comparing)
 
 
--- Input:  insertTag [Tag "shopping", Tag "walmart"] (Content "Buy milk") []
--- Output: [TagNode (Tag "shopping") [TagNode (Tag "walmart") [ContentNode (Content "Buy milk")]]]
+-- Input:  insertTag [Tag "shopping", Tag "walmart"] (Content 0 [Plain "Buy milk"]) []
+-- Output: [TagNode (Tag "shopping") [TagNode (Tag "walmart") [ContentNode (Content 0 [Plain "Buy milk"])]]]
 insertTag :: [Tag] -> Content -> [DocTree] -> [DocTree]
 insertTag [] content tree = ContentNode content : tree
 insertTag (x:xs) content tree = mergeTag (TagNode x (insertTag xs content [])) tree
@@ -21,24 +21,6 @@ mergeTag (TagNode tag children) ((TagNode tagValue kids) : xs)
 mergeTag tag (ContentNode content : xs) = ContentNode content : mergeTag tag xs
 
 
-
--- Example 1
--- Input:  [Note (Content "Buy milk") [Tag "shopping"]]
--- Output: [TagNode (Tag "shopping") [ContentNode (Content "Buy milk")]]
-
--- Example 2
--- Input:  [Note (Content "Buy milk") [Tag "shopping", Tag "walmart"], Note (Content "Buy paint") [Tag "shopping", Tag "homedepot"]]
--- Output: [TagNode (Tag "shopping") [TagNode (Tag "homedepot") [ContentNode (Content "Buy paint")], TagNode (Tag "walmart") [ContentNode (Content "Buy milk")]]]
-
--- Example 3
--- Input:  [Note (Content "Buy milk") [Tag "shopping"], Note (Content "No tag here") []]
--- Output: [ContentNode (Content "No tag here"), TagNode (Tag "shopping") [ContentNode (Content "Buy milk")]]
-     
-
--- Example 4
--- Input:  [Note (Content "Buy milk") [Tag "shopping"], Note (Content "Finish parser") [Tag "todo"]]
--- Output: [TagNode (Tag "todo") [ContentNode (Content "Finish parser")], TagNode (Tag "shopping") [ContentNode (Content "Buy milk")]]
-
 buildTree :: [Note] -> [DocTree]
 buildTree [] = []
 buildTree (n:ns) =
@@ -49,8 +31,7 @@ buildTree (n:ns) =
 
 extractString :: DocTree -> String
 extractString (TagNode (Tag name) _) = name
-extractString (ContentNode (Content _ text)) = text
-extractString (ContentNode (Drawing _ text)) = text
+extractString (ContentNode content)  = contentText content
 
 sortTreeAlphabetical :: [DocTree] -> [DocTree]
 sortTreeAlphabetical trees = map sortChildren (sortBy (comparing extractString) trees)
@@ -59,3 +40,15 @@ sortTreeAlphabetical trees = map sortChildren (sortBy (comparing extractString) 
     sortChildren (TagNode tag children) = TagNode tag (sortTreeAlphabetical children)
     sortChildren leaf = leaf
 
+
+-- Earliest position in the file of any note at or under this node.
+minIndex :: DocTree -> Int
+minIndex (ContentNode content)  = contentIndex content
+minIndex (TagNode _ children)   = minimum (maxBound : map minIndex children)
+
+sortTreeChronological :: [DocTree] -> [DocTree]
+sortTreeChronological trees = map sortChildren (sortBy (comparing minIndex) trees)
+  where
+    sortChildren :: DocTree -> DocTree
+    sortChildren (TagNode tag children) = TagNode tag (sortTreeChronological children)
+    sortChildren leaf = leaf

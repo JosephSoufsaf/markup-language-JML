@@ -81,4 +81,5 @@ Chronological sorting orders tags and notes by when they were first written in t
 
 # Drawing (Sort of but not really)
 
-Mermaid is in progress of being integrated. The tool mermaid will be used to let users to create charts and diagrams. It will use Mermaid source.  
+Mermaid is in progress of being integrated. The tool mermaid will be used to let users to create charts and diagrams. It will use Mermaid source. 
+

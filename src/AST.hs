@@ -1,10 +1,10 @@
-module AST (Note(..), Content(..), Tag(..), Document(..), DocTree(..)) where
+module AST where
 
 data Note = Note Content [Tag]
     deriving (Show, Eq)
 
-data Content = Content Int String | Drawing Int String
-    deriving (Show)
+data Content = Content Int [StyledText] | Drawing Int String
+    deriving (Show, Eq)
 
 data Tag = Tag String
     deriving (Show, Eq, Ord)
@@ -12,10 +12,15 @@ data Tag = Tag String
 data Document = Document [Note]
     deriving (Show, Eq)
 
-data DocTree = TagNode Tag [DocTree]  | ContentNode Content
+data DocTree = TagNode Tag [DocTree] | ContentNode Content
     deriving (Show, Eq)
 
+<<<<<<< HEAD
 
+=======
+data StyledText = Italic String | Bold String | Plain StringV
+    deriving (Show)
+>>>>>>> origin/optimisation
 
 instance Eq Content where
     (Drawing idx1 _) == (Drawing idx2 _) = idx1 == idx2
@@ -23,15 +28,4 @@ instance Eq Content where
     _ == _ = False
 
 instance Ord Content where
-    (Content idx1 _) <= (Content idx2 _) = idx1 <= idx2
-    (Drawing idx1 _) <= (Drawing idx2 _) = idx1 <= idx2
-
-
-
-
-
-
-
-
-
-
+    compare a b = compare (contentIndex a) (contentIndex b)

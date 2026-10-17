@@ -2,28 +2,35 @@
 
 import System.Environment (getArgs)
 import System.Process (callCommand)
+import System.Info (os)
+import System.FilePath (replaceExtension)
+import System.IO (openFile, hSetEncoding, hGetContents, IOMode(ReadMode), utf8)
 import Lucid (renderToFile)
 import Parser
-import AST
 import Organizer
 import Tree
 import Render
 import qualified Data.Map as Map
 
-stripLeadingDotSlash :: String -> String
-stripLeadingDotSlash ('.':'\\':rest) = rest
-stripLeadingDotSlash ('.':'/':rest) = rest
-stripLeadingDotSlash s = s
-
 toHtmlFilename :: String -> String
-toHtmlFilename filename = takeWhile (/= '.') (stripLeadingDotSlash filename) ++ ".html"
+toHtmlFilename filename = replaceExtension filename "html"
+
+openInBrowser :: String -> IO ()
+openInBrowser file = callCommand command
+  where
+    command = case os of
+        "mingw32" -> "start \"\" \"" ++ file ++ "\""
+        "darwin"  -> "open \"" ++ file ++ "\""
+        _         -> "xdg-open \"" ++ file ++ "\""
 
 main :: IO ()
 main = do
     args <- getArgs
     case args of
         [filename] -> do
-            text <- readFile filename
+            handle <- openFile filename ReadMode
+            hSetEncoding handle utf8
+            text <- hGetContents handle
             let allLines = splitLines text
             let headerLines = getHeaders allLines
             let viewChoice = findViewValue headerLines
@@ -35,14 +42,17 @@ main = do
             if viewChoice == "tree"
                 then do
                     let builtTree = buildTree notes
-                    let sortedTree = if sortChoice == "alphabetical"
-                                        then sortTreeAlphabetical builtTree
-                                        else builtTree
-                    renderToFile outputFile (defaultStyle <> mermaidScript <> renderTree sortedTree)
+                    let sortedTree = case sortChoice of
+                                        "chronological" -> sortTreeChronological builtTree
+                                        _               -> sortTreeAlphabetical builtTree
+                    renderToFile outputFile (renderPage (renderTree sortedTree))
                 else do
-                    let grouped = singleTagSorting (notesToPairs notes)
-                    let flatHtml = renderMap (sortMiscLast (Map.toList grouped))
-                    renderToFile outputFile (defaultStyle <> mermaidScript <> flatHtml)
+                    let grouped = Map.toList (singleTagSorting (notesToPairs notes))
+                    let sorted = case sortChoice of
+                                    "chronological" -> sortFlatChronological grouped
+                                    _               -> sortFlatAlphabetical grouped
+                    renderToFile outputFile (renderPage (renderMap (sortMiscLast sorted)))
 
-            callCommand ("start " ++ outputFile)
+            putStrLn ("Wrote " ++ outputFile)
+            openInBrowser outputFile
         _ -> putStrLn "Usage: jml <path-to-.jml-file>"
