@@ -27,8 +27,7 @@ removeEmptyLines sentences = filter (not . isBlank) sentences where
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 removeHeaders :: [String] -> [String]
-removeHeaders sentences = filter ( not . containsHeader) sentences
-    
+removeHeaders listOfString = filter (not . validateHeaderFormat) listOfString   
 
 
 -- Example Input: "#view:tree", "Buy milk"
@@ -40,7 +39,17 @@ containsHeader string = elem '#' string
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: ["#view:tree"]
 getHeaders :: [String] -> [String]
-getHeaders = filter containsHeader
+getHeaders list = filter validateFormatHeader list where
+    -- Example Input: "#view:tree"
+    -- Example output: True
+    -- This function verifies that the format of a header is valid
+    -- "#view:tree" is valid but so is "#chocolate:fountain" because only the format is valid
+    validateHeaderFormat :: String -> Bool
+    validateHeaderFormat ('#':rest) =
+        case span isAlpha rest of
+            (firstHalf, ':':rest) -> isWord firstHalf && isWord rest
+            otherwise -> False
+    validateHeaderFormat _ = False
 
 
 -- Example Input: "#view:tree"
@@ -58,14 +67,6 @@ getValue []       = []
 getValue (':':xs) = xs
 getValue (_:xs)   = getValue xs
 
--- findViewValue/findSortValue sont presque identiques : les fusionner
--- en un seul lookup au lieu de deux fonctions récursives séparées
-findHeaderValue :: String -> String -> [String] -> String
-findHeaderValue key def headers =
-    fromMaybe def (lookup key (map (\l -> (getKey l, getValue l)) headers))
-
-findViewValue = findHeaderValue "view" "flat"
-findSortValue = findHeaderValue "sort" "alphabetical"
 
 -------------- END OF HEADER FUNCTIONS --------------
 
