@@ -3,7 +3,7 @@ import AST
 import qualified Data.Map as Map
 import Data.List (isInfixOf)
 import Data.String
-
+import Data.Bifunctor (second)
 
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
@@ -40,6 +40,7 @@ containsHeader string = elem '#' string
 -- Example Output: ["#view:tree"]
 getHeaders :: [String] -> [String]
 getHeaders list = filter validateFormatHeader list where
+
     -- Example Input: "#view:tree"
     -- Example output: True
     -- This function verifies that the format of a header is valid
@@ -51,6 +52,10 @@ getHeaders list = filter validateFormatHeader list where
             otherwise -> False
     validateHeaderFormat _ = False
 
+-- Exa
+identifyHeaders :: String -> (String, String)
+identifyHeaders ('#':rest) = identifyHeaders rest
+identifyHeaders header = second (drop 1) (break (== ':') header)
 
 -- Example Input: "#view:tree"
 -- Example Output: "view"
@@ -66,6 +71,8 @@ getValue :: String -> String
 getValue []       = []
 getValue (':':xs) = xs
 getValue (_:xs)   = getValue xs
+
+
 
 
 -------------- END OF HEADER FUNCTIONS --------------
