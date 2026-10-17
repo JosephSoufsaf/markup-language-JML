@@ -15,9 +15,7 @@ splitLines str = lines str
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "      "]
 -- Example Output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 removeEmptyLines :: [String] -> [String]
-removeEmptyLines sentences = filter (not . isBlank) sentences where
-    isBlank :: String -> Bool
-    isBlank = null . dropWhile isSpace
+removeEmptyLines :: filter (not . all isSpace)
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
@@ -52,11 +50,14 @@ getHeaders list = filter validateFormatHeader list where
             otherwise -> False
     validateHeaderFormat _ = False
 
--- Exa
+-- Example Input : "#view:tree"
+-- Example Output: ("view", "tree")
 identifyHeaders :: String -> (String, String)
 identifyHeaders ('#':rest) = identifyHeaders rest
 identifyHeaders header = second (drop 1) (break (== ':') header)
 
+{-
+Kept in case needed
 -- Example Input: "#view:tree"
 -- Example Output: "view"
 getKey :: String -> String
@@ -71,6 +72,7 @@ getValue :: String -> String
 getValue []       = []
 getValue (':':xs) = xs
 getValue (_:xs)   = getValue xs
+-}
 
 
 
