@@ -15,7 +15,7 @@ data Document = Document [Note]
 data DocTree = TagNode Tag [DocTree] | ContentNode Content
     deriving (Show, Eq)
 
-data StyledText = Italic String | Bold String | Plain StringV
+data StyledText = Italic String | Bold String | Plain String
     deriving (Show)
 
 instance Eq Content where
