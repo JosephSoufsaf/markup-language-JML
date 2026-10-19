@@ -15,12 +15,8 @@ data Document = Document [Note]
 data DocTree = TagNode Tag [DocTree] | ContentNode Content
     deriving (Show, Eq)
 
-<<<<<<< HEAD
-
-=======
-data StyledText = Italic String | Bold String | Plain StringV
+data StyledText = Italic String | Bold String | Plain String
     deriving (Show)
->>>>>>> origin/optimisation
 
 instance Eq Content where
     (Drawing idx1 _) == (Drawing idx2 _) = idx1 == idx2

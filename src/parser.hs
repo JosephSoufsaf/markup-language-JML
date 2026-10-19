@@ -92,20 +92,63 @@ assignIndex lines = (zip [0..] lines)
 
 
 -------------- START OF PARSING FUNCTIONS --------------
--- Example Input: (0, "Buy milk @shopping")
--- Example Output: Content 0 "Buy milk "
-
--- if it is a drawing section then I have to say its a drawing so the
--- functions know how to render it
+-- Example Input: (0, "Buy milk **this is important** @shopping")
+-- Example Output: Content 0 [Plain "Buy milk ", Bold this is important]
 parseContent :: (Int, String) -> Content
-parseContent (index, line)
-    | ("/*" `isInfixOf` line) && ("*/" `isInfixOf` line) = Drawing index (removeDelimiters (getContentString line))
-    | otherwise = Content index (getContentString line) where
+parseContent (index, line) = Content index (stringType line)
 
-        getContentString :: String -> String 
-        getContentString [] = []
-        getContentString ('@':_) = []
-        getContentString (x:xs) = x : getContentString xs
+
+
+takeUntil :: String -> String -> String
+takeUntil _ [] = []
+takeUntil d s@(c:cs)
+  | d `isPrefixOf` s = []
+  | otherwise = c : takeUntil d cs
+
+
+
+dropUntil :: String -> String -> String
+dropUntil _ [] = []
+dropUntil d s@(_:cs)
+  | d `isPrefixOf` s = drop (length d) s
+  | otherwise = dropUntil d cs
+
+
+stringType :: String -> [StyledText]-> [StyledText]
+stringType [] acc = acc  
+stringType ('*':'*':rest) acc = stringType (dropUntil "**" rest) (acc ++ [Bold (takeUntil "**" rest)])
+stringType ('*':rest) acc = stringType (dropUntil "*" rest) (acc ++ [Italic (takeUntil "*" rest)])
+stringType s acc = stringType (dropWhile (/= '*') s) (acc ++ [Plain (takeWhile (/= '*') s)])
+
+
+
+
+getContentString :: String -> String 
+getContentString [] = []
+getContentString ('@':_) = []
+getContentString (x:xs) = x : getContentString xs
+
+-- Example input: 
+stringsType :: [String] -> [StyledText]
+stringsType = map stringType
+
+-- Example input : *Hello* 
+-- Example output : Italic Hello
+stringType :: String -> StyledText
+stringType str
+    | isItalic str = Italic str
+    | isBold str = Bold str
+    | otherwise = Plain str where
+
+    --Example input : **Hello**
+    --Example output : True
+    isBold ('*':'*':rest) = length rest >= 3 && last rest == '*' && last (init rest) == '*'
+    isBold _ = False
+    
+    -- Example Input : *hello*
+    -- Example Output : True
+    isItalic ('*':rest) = length rest >= 2 && last rest = '*'
+    isItalic _ = False
 
 
 seperateString :: String -> [StyledText]
