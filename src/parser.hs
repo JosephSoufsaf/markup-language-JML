@@ -1,9 +1,8 @@
 module Parser where
 import AST
-import qualified Data.Map as Map
-import Data.List (isInfixOf)
-import Data.String
 import Data.Bifunctor (second)
+import Data.Char (isSpace, isAlpha)
+import Data.List (isPrefixOf)
 
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
@@ -15,13 +14,31 @@ splitLines str = lines str
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "      "]
 -- Example Output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 removeEmptyLines :: [String] -> [String]
-removeEmptyLines :: filter (not . all isSpace)
+removeEmptyLines = filter (not . all isSpace)
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
 
 
 -------------- START OF HEADER FUNCTIONS --------------
+
+isWord :: String -> Bool
+isWord w = not (null w) && all isAlpha w
+
+
+-- Example Input: "#view:tree"
+-- Example output: True
+-- This function verifies that the format of a header is valid
+-- "#view:tree" is valid but so is "#chocolate:fountain" because only the format is valid
+validateHeaderFormat :: String -> Bool
+validateHeaderFormat ('#':rest) =
+    case span isAlpha rest of
+        (firstHalf, ':':restOf) -> isWord firstHalf && isWord restOf
+        _ -> False
+validateHeaderFormat _ = False 
+
+
+
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 removeHeaders :: [String] -> [String]
@@ -37,45 +54,13 @@ containsHeader string = elem '#' string
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: ["#view:tree"]
 getHeaders :: [String] -> [String]
-getHeaders list = filter validateFormatHeader list where
-
-    -- Example Input: "#view:tree"
-    -- Example output: True
-    -- This function verifies that the format of a header is valid
-    -- "#view:tree" is valid but so is "#chocolate:fountain" because only the format is valid
-    validateHeaderFormat :: String -> Bool
-    validateHeaderFormat ('#':rest) =
-        case span isAlpha rest of
-            (firstHalf, ':':rest) -> isWord firstHalf && isWord rest
-            otherwise -> False
-    validateHeaderFormat _ = False
+getHeaders list = filter validateHeaderFormat list 
 
 -- Example Input : "#view:tree"
 -- Example Output: ("view", "tree")
 identifyHeaders :: String -> (String, String)
 identifyHeaders ('#':rest) = identifyHeaders rest
 identifyHeaders header = second (drop 1) (break (== ':') header)
-
-{-
-Kept in case needed
--- Example Input: "#view:tree"
--- Example Output: "view"
-getKey :: String -> String
-getKey [] = []
-getKey ('#':xs) = getKey xs
-getKey (':':_) = []
-getKey (x:xs) = x : getKey xs
-
--- Example Input: "#view:tree"
--- Example Output: "tree"
-getValue :: String -> String
-getValue []       = []
-getValue (':':xs) = xs
-getValue (_:xs)   = getValue xs
--}
-
-
-
 
 -------------- END OF HEADER FUNCTIONS --------------
 
@@ -86,31 +71,24 @@ getValue (_:xs)   = getValue xs
 -- Example Input: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: [(0, "Buy milk @shopping"), (1, "Finish JML parser @todo"), (2, "No tag here")]
 assignIndex :: [String] -> [(Int, String)]
-assignIndex lines = (zip [0..] lines)
+assignIndex lignes = (zip [0..] lignes)
 
 -------------- END OF INDEX ASSIGNING FUNCTIONS --------------
 
 
 -------------- START OF PARSING FUNCTIONS --------------
--- Example Input: (0, "Buy milk **this is important** @shopping")
--- Example Output: Content 0 [Plain "Buy milk ", Bold this is important]
-parseContent :: (Int, String) -> Content
-parseContent (index, line) = Content index (stringType line)
-
-
-
 takeUntil :: String -> String -> String
 takeUntil _ [] = []
-takeUntil d s@(c:cs)
-  | d `isPrefixOf` s = []
+takeUntil d (c:cs)
+  | isPrefixOf d (c:cs) = []
   | otherwise = c : takeUntil d cs
 
 
 
 dropUntil :: String -> String -> String
 dropUntil _ [] = []
-dropUntil d s@(_:cs)
-  | d `isPrefixOf` s = drop (length d) s
+dropUntil d (c:cs)
+  | isPrefixOf d (c:cs) = drop (length d) (c:cs)
   | otherwise = dropUntil d cs
 
 
@@ -121,78 +99,17 @@ stringType ('*':rest) acc = stringType (dropUntil "*" rest) (acc ++ [Italic (tak
 stringType s acc = stringType (dropWhile (/= '*') s) (acc ++ [Plain (takeWhile (/= '*') s)])
 
 
-
-
+-- Example Input : "Hello what is going on @tag"
+-- Example output : "Hello what is going"
 getContentString :: String -> String 
 getContentString [] = []
 getContentString ('@':_) = []
 getContentString (x:xs) = x : getContentString xs
 
--- Example input: 
-stringsType :: [String] -> [StyledText]
-stringsType = map stringType
-
--- Example input : *Hello* 
--- Example output : Italic Hello
-stringType :: String -> StyledText
-stringType str
-    | isItalic str = Italic str
-    | isBold str = Bold str
-    | otherwise = Plain str where
-
-    --Example input : **Hello**
-    --Example output : True
-    isBold ('*':'*':rest) = length rest >= 3 && last rest == '*' && last (init rest) == '*'
-    isBold _ = False
-    
-    -- Example Input : *hello*
-    -- Example Output : True
-    isItalic ('*':rest) = length rest >= 2 && last rest = '*'
-    isItalic _ = False
-
-
-seperateString :: String -> [StyledText]
-seperateString "*" = ""
-seperateString [] = []
-seperateString (x:xs)
-    | x == '*' = seperateString xs 
-    | otherwise = x : seperateString xs
-
-
-
-{- -- Example input "*Hello*"
--- Example output True
--- Example input "**Hello**"
--- Example output True
--- Example input "*hello" 
--- Example output False
--- Example input "** hello"
--- Example output False  -}
-verifyFormattingComplete :: String -> Bool
-verifyFormattingComplete string = verifyFirstFormatting string && verifyFirstFormatting (reverse string) where
-    verifyFirstFormatting :: String -> Bool
-    verifyFirstFormatting ('*':'*':xs) = True
-    verifyFirstFormatting ('*':xs) = True
-    verifyFirstFormatting _ = False
-
-removeFirstFormattingDelimiters :: String -> String
-removeFirstFormattingDelimiters [] = []
-removeFirstFormattingDelimiters ('*':xs) = xs
-
--- Example input "*hello*"
--- Example output "hello"
-formattingDelimiters :: String -> StyledText
-formattingDelimiters ('*':'*':xs) = Bold (reverse (removeFirstFormattingDelimiters (reverse (removeFirstFormattingDelimiters xs))))
-formattingDelimiters ('*':xs) = Italic (reverse (removeFirstFormattingDelimiters (reverse (removeFirstFormattingDelimiters xs))))
-    
-
--- Example input "/*hello*/"
--- Example output "hello"
-removeDelimiters :: String -> String
-removeDelimiters str = reverse (removeFirst (reverse (removeFirst str))) where
-    removeFirst ('/':'*':xs) = xs
-    removeFirst xs           = xs
-
+-- Example Input : "Hello  what is going on @aCertainTag"
+-- Example output : Content 0 [Plain Hello , Bold what , Plain is going on] P.S there is a space after hello and what
+parseContent :: (Int, String) -> Content
+parseContent (index, line) = Content index (stringType (getContentString line) [])
 
 -- Example input:  "Buy milk @shopping@walmart"
 -- Example output: "shopping@walmart"
@@ -202,18 +119,20 @@ dropUntilTag ('@':xs) = xs
 dropUntilTag (_:xs) = dropUntilTag xs
 
 
--- Example input:  ["shopping", "walmart"]
--- Example output: [Tag "shopping", Tag "walmart"]
-parseTags :: [String] -> [Tag]
-parseTags = map Tag
-
-
 -- Example input:  "shopping@walmart"
 -- Example output: ["shopping", "walmart"]
 getTags :: String -> [String]
 getTags s = case break (== '@') s of
     (tag, [])     -> [tag]
     (tag, _:rest) -> tag : getTags rest
+
+
+-- Example input:  ["shopping", "walmart"]
+-- Example output: [Tag "shopping", Tag "walmart"]
+parseTags :: [String] -> [Tag]
+parseTags = map Tag
+
+
 
 -- Example Input: [Tag "shopping "]
 -- Example Output: [Tag "shopping"]
@@ -255,4 +174,4 @@ parseDocument documentContent =
                 (removeHeaders
                     (removeEmptyLines
                         (splitLines documentContent)))))
--------------- END OF PARSING FUNCTIONS --------------2
+-------------- END OF PARSING FUNCTIONS --------------
