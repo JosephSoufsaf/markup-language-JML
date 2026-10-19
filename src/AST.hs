@@ -4,7 +4,7 @@ data Note = Note Content [Tag]
     deriving (Show, Eq)
 
 data Content = Content Int [StyledText] | Drawing Int String
-    deriving (Show, Eq)
+    deriving (Show)
 
 data Tag = Tag String
     deriving (Show, Eq, Ord)
@@ -16,12 +16,14 @@ data DocTree = TagNode Tag [DocTree] | ContentNode Content
     deriving (Show, Eq)
 
 data StyledText = Italic String | Bold String | Plain String
-    deriving (Show)
+    deriving (Show, Eq)
+
+contentIndex :: Content -> Int
+contentIndex (Content i _) = i
+contentIndex (Drawing i _) = i
 
 instance Eq Content where
-    (Drawing idx1 _) == (Drawing idx2 _) = idx1 == idx2
-    (Content idx1 _) == (Content idx2 _) = idx1 == idx2
-    _ == _ = False
+    a == b = contentIndex a == contentIndex b
 
 instance Ord Content where
     compare a b = compare (contentIndex a) (contentIndex b)
