@@ -1,11 +1,8 @@
 module Parser where
 import AST
-import Data.List (isInfixOf)
-import Data.String
 import Data.Bifunctor (second)
 import Data.Char (isSpace, isAlpha)
 import Data.List (isPrefixOf)
-import Data.Bifunctor (second)
 
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
@@ -37,7 +34,7 @@ validateHeaderFormat :: String -> Bool
 validateHeaderFormat ('#':rest) =
     case span isAlpha rest of
         (firstHalf, ':':restOf) -> isWord firstHalf && isWord restOf
-        otherwise -> False
+        _ -> False
 validateHeaderFormat _ = False 
 
 
@@ -175,4 +172,4 @@ parseDocument documentContent =
                 (removeHeaders
                     (removeEmptyLines
                         (splitLines documentContent)))))
--------------- END OF PARSING FUNCTIONS --------------2
+-------------- END OF PARSING FUNCTIONS --------------
