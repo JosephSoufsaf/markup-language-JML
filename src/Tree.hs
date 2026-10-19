@@ -28,6 +28,15 @@ buildTree (n:ns) =
         Just tags -> insertTag tags (getContent n) (buildTree ns)
 
 
+-- Plain text of a piece of content, used as the sort key.
+contentText :: Content -> String
+contentText (Content _ styled) = concatMap styledText styled
+  where
+    styledText (Italic s) = s
+    styledText (Bold s)   = s
+    styledText (Plain s)  = s
+contentText (Drawing _ text)   = text
+
 extractString :: DocTree -> String
 extractString (TagNode (Tag name) _) = name
 extractString (ContentNode content)  = contentText content
