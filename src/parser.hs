@@ -119,18 +119,20 @@ dropUntilTag ('@':xs) = xs
 dropUntilTag (_:xs) = dropUntilTag xs
 
 
--- Example input:  ["shopping", "walmart"]
--- Example output: [Tag "shopping", Tag "walmart"]
-parseTags :: [String] -> [Tag]
-parseTags = map Tag
-
-
 -- Example input:  "shopping@walmart"
 -- Example output: ["shopping", "walmart"]
 getTags :: String -> [String]
 getTags s = case break (== '@') s of
     (tag, [])     -> [tag]
     (tag, _:rest) -> tag : getTags rest
+
+
+-- Example input:  ["shopping", "walmart"]
+-- Example output: [Tag "shopping", Tag "walmart"]
+parseTags :: [String] -> [Tag]
+parseTags = map Tag
+
+
 
 -- Example Input: [Tag "shopping "]
 -- Example Output: [Tag "shopping"]

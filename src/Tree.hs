@@ -6,7 +6,6 @@ import Data.List (sortBy)
 import Data.Ord (comparing)
 
 
--- Input:  insertTag [Tag "shopping", Tag "walmart"] (Content 0 [Plain "Buy milk"]) []
 -- Output: [TagNode (Tag "shopping") [TagNode (Tag "walmart") [ContentNode (Content 0 [Plain "Buy milk"])]]]
 insertTag :: [Tag] -> Content -> [DocTree] -> [DocTree]
 insertTag [] content tree = ContentNode content : tree
