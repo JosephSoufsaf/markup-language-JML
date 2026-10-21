@@ -6,15 +6,49 @@ import Data.List (isPrefixOf)
 
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
--- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here"
--- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
+-- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here\n@multi{hello\nWhat is going on @maybe\nChocolate is whats up @BigMaybe\n}"
+-- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "@multi{hello", "What is going on @maybe", "Chocolate is whats up @BigMaybe", "}"]
 splitLines :: String -> [String]
 splitLines str = lines str
+
 
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "      "]
 -- Example Output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 removeEmptyLines :: [String] -> [String]
 removeEmptyLines = filter (not . all isSpace)
+
+
+
+{-
+ So the idea is that I find the start of the multiline block and everything after is a note
+ but with an added tag so I simply produce the same thing normally would but with the added tag of the multiline 
+  -}
+
+
+
+-- Example input:  "@shopping{"
+-- Example output: True
+isMultiLine :: String -> Bool
+isMultiLine line = case trimEdges line of
+    ('@':rest) -> '{' `elem` rest && last rest /= '}'
+    _ -> False
+
+-- Example input : "@shopping{hello"
+-- Example output : "shopping"
+getTagHeadMulti :: String -> String
+getTagHeadMulti (x:xs) 
+    | x == '@' = takeUntil "{" xs
+
+
+
+-- Example input : "@shopping{hello"
+-- Example output : "hello"
+getContentHeadMulti :: String -> String
+getContentHeadMulti string = dropUntil '}' string
+
+
+
+
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
@@ -77,6 +111,7 @@ assignIndex lignes = (zip [0..] lignes)
 
 
 -------------- START OF PARSING FUNCTIONS --------------
+
 takeUntil :: String -> String -> String
 takeUntil _ [] = []
 takeUntil d (c:cs)
@@ -131,7 +166,6 @@ getTags s = case break (== '@') s of
 -- Example output: [Tag "shopping", Tag "walmart"]
 parseTags :: [String] -> [Tag]
 parseTags = map Tag
-
 
 
 -- Example Input: [Tag "shopping "]
