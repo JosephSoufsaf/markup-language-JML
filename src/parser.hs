@@ -7,27 +7,40 @@ import Data.List (isPrefixOf)
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
 -- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here\n@multi{hello\nWhat is going on @maybe\nChocolate is whats up @BigMaybe\n}"
--- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "@multi{hello", "What is going on @maybe", "Chocolate is whats up @BigMaybe", "}"]
+-- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "@multi{", "What is going on @maybe", "Chocolate is whats up @BigMaybe", "}"]
 splitLines :: String -> [String]
 splitLines str = lines str
 
 
--- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "      "]
 -- Example Output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 removeEmptyLines :: [String] -> [String]
 removeEmptyLines = filter (not . all isSpace)
 
+-- Example input:  ["avant", "@multi{", "what is going on @maybe", "chocolate is whats up @bigmaybe", "}", "apres"]
+-- Example output: ["avant", "what is going on @multi@maybe", "chocolate is whats up @multi@bigmaybe", "apres"]
+transform :: [String] -> [String]
+transform [] = []
+transform (x:xs)
+    | isMultiLine x = foo (x : inside ++ map (takeUntil "}") (take 1 after)) ++ transform (drop 1 after)
+    | otherwise = x : transform xs
+    where
+        (inside, after) = break (elem '}') xs
 
 
-{-
- So the idea is that I find the start of the multiline block and everything after is a note
- but with an added tag so I simply produce the same thing normally would but with the added tag of the multiline 
-  -}
-
+-- Example input:  ["@multi{", "what is going on @maybe", "chocolate is whats up @bigmaybe"]
+-- Example output: ["what is going on @multi@maybe", "chocolate is whats up @multi@bigmaybe"]
 foo :: [String] -> [String]
-foo strings@(x:xs)
-    | isMultiLine (first strings) = (getContentHeadMulti (first strings)) ++ getTagHeadMulti (first strings) : foo xs
-    | otherwise 
+foo [] = []
+foo (h:block) = map (addMultiTag tag) (removeEmptyLines (getContentHeadMulti h : block))
+    where
+        tag = getTagHeadMulti h
+        -- Example input:  "multi", "what is going on @maybe"
+        -- Example output: "what is going on @multi@maybe"
+        -- Example input:  "multi", "no tag here"
+        -- Example output: "no tag here@multi"
+        addMultiTag :: String -> String -> String
+        addMultiTag tag line = getContentString line ++ "@" ++ tag ++ dropWhile (/= '@') line
+
 
 
 
@@ -41,19 +54,13 @@ isMultiLine line = case trimEdges line of
 -- Example input : "@shopping{hello"
 -- Example output : "shopping"
 getTagHeadMulti :: String -> String
-getTagHeadMulti (x:xs) 
-    | x == '@' = takeUntil "{" xs
-
+getTagHeadMulti line = takeUntil "{" (drop 1 (trimEdges line))
 
 
 -- Example input : "@shopping{hello"
 -- Example output : "hello"
 getContentHeadMulti :: String -> String
-getContentHeadMulti string = dropUntil '}' string
-
-
-
-
+getContentHeadMulti line = dropUntil "{" line
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
@@ -211,6 +218,7 @@ parseDocument documentContent =
         (parseNotes
             (assignIndex
                 (removeHeaders
-                    (removeEmptyLines
-                        (splitLines documentContent)))))
+                    (transform
+                        (removeEmptyLines
+                            (splitLines documentContent))))))
 -------------- END OF PARSING FUNCTIONS --------------
