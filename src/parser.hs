@@ -24,9 +24,14 @@ removeEmptyLines = filter (not . all isSpace)
  but with an added tag so I simply produce the same thing normally would but with the added tag of the multiline 
   -}
 
+foo :: [String] -> [String]
+foo strings@(x:xs)
+    | isMultiLine (first strings) = (getContentHeadMulti (first strings)) ++ getTagHeadMulti (first strings) : foo xs
+    | otherwise 
 
 
--- Example input:  "@shopping{"
+
+-- Example input:  "@shopping{" or "@shopping{hello" 
 -- Example output: True
 isMultiLine :: String -> Bool
 isMultiLine line = case trimEdges line of
