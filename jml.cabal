@@ -1,16 +1,16 @@
-cabal-version:      2.4
+cabal-version:      3.4
 name:               jml
 version:            0.1.0.0
-build-type:         Simple
+build-type:         simple
 
 executable jml
-    main-is:          Main.hs
+    main-is:          main.hs
     hs-source-dirs:   src
-    other-modules:    AST, Parser, Organizer, Tree, Render
+    other-modules:    ast, parser, organizer, tree, render
     build-depends:    base >=4 && <5,
                       containers,
                       text,
                       lucid,
                       process,
                       filepath
-    default-language: Haskell2010
+    default-language: haskell2010
