@@ -6,7 +6,7 @@ build-type:         Simple
 executable jml
     main-is:          main.hs
     hs-source-dirs:   src
-    other-modules:    ast, parser, organizer, tree, render
+    other-modules:    Ast, Parser, Organizer, Tree, Render
     build-depends:    base >=4 && <5,
                       containers,
                       text,
