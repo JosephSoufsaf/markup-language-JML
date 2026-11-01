@@ -6,15 +6,63 @@ import Data.List (isPrefixOf)
 
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
--- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here"
--- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
+-- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here\n@multi{hello\nWhat is going on @maybe\nChocolate is whats up @BigMaybe\n}"
+-- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "@multi{hello", "What is going on @maybe", "Chocolate is whats up @BigMaybe", "}"]
 splitLines :: String -> [String]
 splitLines str = lines str
 
--- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "      "]
--- Example Output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
+
+-- Example input:  ["#view:tree", "", "Buy milk @shopping", "   ", "No tag here"]
+-- Example output: ["#view:tree", "Buy milk @shopping", "No tag here"]
 removeEmptyLines :: [String] -> [String]
 removeEmptyLines = filter (not . all isSpace)
+
+
+-- Example input:  ["avant", "@multi{", "what is going on @maybe", "chocolate is whats up @bigmaybe", "}", "milieu", "@other{", "hello @x", "}", "apres"]
+-- Example output: ["avant", "what is going on @multi@maybe", "chocolate is whats up @multi@bigmaybe", "milieu", "hello @other@x", "apres"]
+processBlocks :: [String] -> [String]
+processBlocks [] = []
+processBlocks strings =
+    let (beforeMultiLine, afterMultiLine) = break isMultiLine strings
+        (block, afterBlock)               = break isEndBrace afterMultiLine
+    in  beforeMultiLine ++ tagBlock block ++ processBlocks (drop 1 afterBlock)
+
+
+-- Example input:  "}" or "  } "
+-- Example output: True
+isEndBrace :: String -> Bool
+isEndBrace line = trimEdges line == "}"
+
+
+-- Example input:  ["@multi{", "what is going on @maybe", "chocolate is whats up @bigmaybe"]
+-- Example output: ["what is going on @multi@maybe", "chocolate is whats up @multi@bigmaybe"]
+tagBlock :: [String] -> [String]
+tagBlock [] = []
+tagBlock [_] = []
+tagBlock (x:y:xs)
+    | all isSpace y = tagBlock (x:xs)
+    | otherwise = (getContentString y ++ tag ++ dropWhile (/= '@') y) : tagBlock (x:xs)
+    where
+        tag = getTagBlock x
+
+
+-- Example input:  "@shopping{" or "@shopping{hello"
+-- Example output: True
+isMultiLine :: String -> Bool
+isMultiLine line = case trimEdges line of
+    ('@':rest) -> '{' `elem` rest && last rest /= '}'
+    _ -> False
+
+-- Example input : "@shopping{hello"
+-- Example output : "@shopping"
+getTagBlock :: String -> String
+getTagBlock line = takeUntil "{" (trimEdges line)
+
+
+-- Example input : "@shopping{hello"
+-- Example output : "hello"
+getBlockOpeningText :: String -> String
+getBlockOpeningText line = dropUntil "{" line
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
@@ -35,14 +83,13 @@ validateHeaderFormat ('#':rest) =
     case span isAlpha rest of
         (firstHalf, ':':restOf) -> isWord firstHalf && isWord restOf
         _ -> False
-validateHeaderFormat _ = False 
-
+validateHeaderFormat _ = False
 
 
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 removeHeaders :: [String] -> [String]
-removeHeaders listOfString = filter (not . validateHeaderFormat) listOfString   
+removeHeaders listOfString = filter (not . validateHeaderFormat) listOfString
 
 
 -- Example Input: "#view:tree", "Buy milk"
@@ -54,13 +101,32 @@ containsHeader string = elem '#' string
 -- Example Input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: ["#view:tree"]
 getHeaders :: [String] -> [String]
-getHeaders list = filter validateHeaderFormat list 
+getHeaders list = filter validateHeaderFormat list
 
 -- Example Input : "#view:tree"
 -- Example Output: ("view", "tree")
 identifyHeaders :: String -> (String, String)
 identifyHeaders ('#':rest) = identifyHeaders rest
 identifyHeaders header = second (drop 1) (break (== ':') header)
+
+
+-- Example Input : "view" "flat" ["#view:tree", "#sort:chronological"]
+-- Example Output: "tree"   (the default, "flat", is returned if the key is missing)
+findHeaderValue :: String -> String -> [String] -> String
+findHeaderValue key def headers =
+    case [v | h <- headers, let (k, v) = identifyHeaders h, k == key] of
+        (v:_) -> v
+        []    -> def
+
+-- Example Input : ["#view:tree"]
+-- Example Output: "tree"
+findViewValue :: [String] -> String
+findViewValue = findHeaderValue "view" "flat"
+
+-- Example Input : ["#sort:chronological"]
+-- Example Output: "chronological"
+findSortValue :: [String] -> String
+findSortValue = findHeaderValue "sort" "alphabetical"
 
 -------------- END OF HEADER FUNCTIONS --------------
 
@@ -71,12 +137,13 @@ identifyHeaders header = second (drop 1) (break (== ':') header)
 -- Example Input: ["Buy milk @shopping", "Finish JML parser @todo", "No tag here"]
 -- Example Output: [(0, "Buy milk @shopping"), (1, "Finish JML parser @todo"), (2, "No tag here")]
 assignIndex :: [String] -> [(Int, String)]
-assignIndex lignes = (zip [0..] lignes)
+assignIndex lignes = zip [0..] lignes
 
 -------------- END OF INDEX ASSIGNING FUNCTIONS --------------
 
 
 -------------- START OF PARSING FUNCTIONS --------------
+
 takeUntil :: String -> String -> String
 takeUntil _ [] = []
 takeUntil d (c:cs)
@@ -93,21 +160,21 @@ dropUntil d (c:cs)
 
 
 stringType :: String -> [StyledText]-> [StyledText]
-stringType [] acc = acc  
+stringType [] acc = acc
 stringType ('*':'*':rest) acc = stringType (dropUntil "**" rest) (acc ++ [Bold (takeUntil "**" rest)])
 stringType ('*':rest) acc = stringType (dropUntil "*" rest) (acc ++ [Italic (takeUntil "*" rest)])
 stringType s acc = stringType (dropWhile (/= '*') s) (acc ++ [Plain (takeWhile (/= '*') s)])
 
 
 -- Example Input : "Hello what is going on @tag"
--- Example output : "Hello what is going"
-getContentString :: String -> String 
+-- Example output : "Hello what is going on "
+getContentString :: String -> String
 getContentString [] = []
 getContentString ('@':_) = []
 getContentString (x:xs) = x : getContentString xs
 
--- Example Input : "Hello  what is going on @aCertainTag"
--- Example output : Content 0 [Plain Hello , Bold what , Plain is going on] P.S there is a space after hello and what
+-- Example Input : (0, "Hello **what** is going on @aCertainTag")
+-- Example output : Content 0 [Plain "Hello ", Bold "what", Plain " is going on "]
 parseContent :: (Int, String) -> Content
 parseContent (index, line) = Content index (stringType (getContentString line) [])
 
@@ -133,7 +200,6 @@ parseTags :: [String] -> [Tag]
 parseTags = map Tag
 
 
-
 -- Example Input: [Tag "shopping "]
 -- Example Output: [Tag "shopping"]
 trimTags :: [Tag] -> [Tag]
@@ -148,30 +214,27 @@ trimEdges str =
     reverse (removeSpaces (reverse (removeSpaces str)))
   where
     removeSpaces [] = []
-    removeSpaces (' ':xs) = removeSpaces xs
+    removeSpaces (c:xs) | isSpace c = removeSpaces xs
     removeSpaces xs = xs
 
 
--- Example Input: (0, "Buy milk @shopping")
--- Example output: Note (Content 0 "Buy milk ") [Tag "shopping"]
+-- Example Input: (0, "Buy milk @shopping@walmart")
+-- Example Output: Note (Content 0 [Plain "Buy milk "]) [Tag "shopping", Tag "walmart"]
+-- A line with no @ gets no tags (getTags "" would otherwise give [Tag ""]).
 parseNote :: (Int, String) -> Note
-parseNote (index, line) = Note (parseContent (index, line)) (trimTags (parseTags (removeEmptyLines (getTags (dropUntilTag line)))))
+parseNote (index, line)
+    | '@' `elem` line = Note (parseContent (index, line)) (trimTags (parseTags (getTags (dropUntilTag line))))
+    | otherwise       = Note (parseContent (index, line)) []
 
 
--- Example input:  [(0, "Buy milk @shopping"), (1, "No tag here")]
--- Example output: [Note (Content 0 "Buy milk ") [Tag "shopping"], Note (Content 1 "No tag here") []]
-parseNotes :: [(Int, String)] -> [Note]
-parseNotes = map parseNote
-
--- Example input:  "Buy milk @shopping\nNo tag here"
--- Example output: Document [Note (Content 0 "Buy milk ") [Tag "shopping"], Note (Content 1 "No tag here") []]
-
+-- Example Input: the full text of a .jml file
+-- Example Output: Document [Note ...]
 parseDocument :: String -> Document
-parseDocument documentContent =
-    Document
-        (parseNotes
-            (assignIndex
+parseDocument text =
+    Document (map parseNote
+        (assignIndex
+            (processBlocks
                 (removeHeaders
                     (removeEmptyLines
-                        (splitLines documentContent)))))
+                        (splitLines text))))))
 -------------- END OF PARSING FUNCTIONS --------------

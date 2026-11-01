@@ -7,7 +7,7 @@ data Content = Content Int [StyledText] | Drawing Int String
     deriving (Show)
 
 data Tag = Tag String
-    deriving (Show, Eq, Ord)
+    deriving (Show, Eq, Ord) 
 
 data Document = Document [Note]
     deriving (Show, Eq)
@@ -27,3 +27,4 @@ instance Eq Content where
 
 instance Ord Content where
     compare a b = compare (contentIndex a) (contentIndex b)
+
