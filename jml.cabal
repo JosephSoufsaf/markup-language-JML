@@ -13,4 +13,4 @@ executable jml
                       lucid,
                       process,
                       filepath
-    default-language: haskell2010
+    default-language: Haskell2010
