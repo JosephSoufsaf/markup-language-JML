@@ -64,6 +64,10 @@ getTagBlock line = takeUntil "{" (trimEdges line)
 getBlockOpeningText :: String -> String
 getBlockOpeningText line = dropUntil "{" line
 
+
+
+-- Example input:["@python{", "def init():", "  if 4 < 5:", "       return hello"]
+-- Example output
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
 
