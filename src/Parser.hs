@@ -6,6 +6,7 @@ import Data.List (isPrefixOf)
 
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
+
 -- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here\n@multi{hello\nWhat is going on @maybe\nChocolate is whats up @BigMaybe\n}"
 -- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "@multi{hello", "What is going on @maybe", "Chocolate is whats up @BigMaybe", "}"]
 splitLines :: String -> [String]
@@ -55,6 +56,8 @@ isMultiLine line = case trimEdges line of
 
 -- Example input : "@shopping{hello"
 -- Example output : "@shopping"
+-- Example input: "@shopping@maybe{hello"
+-- Example output: "@shopping@maybe"
 getTagBlock :: String -> String
 getTagBlock line = takeUntil "{" (trimEdges line)
 
@@ -65,9 +68,15 @@ getBlockOpeningText :: String -> String
 getBlockOpeningText line = dropUntil "{" line
 
 
-
--- Example input:["@python{", "def init():", "  if 4 < 5:", "       return hello"]
--- Example output
+-- Example Input: "@python{"
+-- Example output: True
+-- Example Input: "@hello{"
+-- Example output: False
+isSpecialBlock :: String -> Bool
+isSpecialBlock [] = False
+isSpecialBlock (x:xs)
+    | x == '@' && ('{' `elem` xs) && (takeUntil "{" xs `elem` ["python", "math", "drawing"]) = True
+    | otherwise = False
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
 
@@ -147,7 +156,29 @@ assignIndex lignes = zip [0..] lignes
 
 
 -------------- START OF PARSING FUNCTIONS --------------
+-- Example Input: takeUntil "{" "python{"
+-- Example output: "python"
 
+-- Example Input: takeUntil "{" "python{abc"
+-- Example output: "python"
+
+-- Example Input: takeUntil "{" "python"
+-- Example output: "python"
+
+-- Example Input: takeUntil "{" "{abc"
+-- Example output: ""
+
+-- Example Input: takeUntil "{" ""
+-- Example output: ""
+
+-- Example Input: takeUntil "{" "a{b{c"
+-- Example output: "a"
+
+-- Example Input: takeUntil "ab" "xxabyy"
+-- Example output: "xx"
+
+-- Example Input: takeUntil "ab" "xxayy"
+-- Example output: "xxayy"
 takeUntil :: String -> String -> String
 takeUntil _ [] = []
 takeUntil d (c:cs)

@@ -20,36 +20,17 @@
 
 ## Done
 
-- Parser (Parser.hs): reads the file line by line, separates the written text from the tags, splits multiple tags apart, and turns each line into a Note.
-
-- First organizer (Organizer.hs): notesToPairs and organizeByTag group notes by tag into one big table (a Map). Right now it only looks at each note's first tag, not all of them.
-
-- HTML page builder (Render.hs): renderNote turns the grouped notes into a page with a heading and a bullet list for each tag. Still being finished.
-
-- Command you run (Main.hs): typing "jml yourfile.jml" reads the file, organizes it, builds the page, saves it as output.html, and opens it in your browser.
-
-- Tree shape (AST.hs): a DocTree is either a tag with a list of things under it, or a piece of content with nothing under it.
-
-- Building the tree (Tree.hs): insertTag adds one note's tags into the tree, one level at a time. mergeTag checks if a tag already exists at that spot and combines the two branches instead of making a duplicate. Tested by hand with the shopping/walmart and shopping/homedepot example and it works.
-
-- buildTree: take the full list of notes and build the whole tree by inserting them one by one. This is the next thing to do. **Definitve**
-
-- trim white space from tag list so you can write @shopping@walmart or @shopping @walmart and its the same thing. The trim removes the front empty space and end empty space. String like " shopping " becomes "shopping"
-  
-- implement sorting functions to sort alphabetically
- 
-- Decide what should happen when a line is only a tag with no actual text before it, like "@shopping" with nothing written first. Right now this creates a note with empty content, which shows up as a blank line in the page. Need to decide: skip it, warn about it, or treat it some other way.
+- 
 
 ## Next
 
-- finish adding chronological sorting to Tree view and flat view.
-
-- Brainstorm new ways to render the notes besides html 
-- 
-- Make the rendered output.html file have a better style
-
-- Should try to add a way to easily create graph drawings for making figures easily 
+- add a way to easily create graph drawings for making figures easily 
 
 - add a way to like make a bunch of notes go under one tag with the same sort of syntax as a comment
   
 - Add a way to link different files. To create links
+
+- Determine a way to seperate special tag blocks. Parse them as Content algebraic or create a new algebraic data type for them
+
+- Determine how to handle giving tags to the special tag blocks. At the end of the block (@python{}@hello) or at the start after the special tag block (@python@hello{})
+
