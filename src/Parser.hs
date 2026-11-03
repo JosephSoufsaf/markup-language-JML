@@ -55,6 +55,8 @@ isMultiLine line = case trimEdges line of
 
 -- Example input : "@shopping{hello"
 -- Example output : "@shopping"
+-- Example input: "@shopping@maybe{hello"
+-- Example output: "@shopping@maybe"
 getTagBlock :: String -> String
 getTagBlock line = takeUntil "{" (trimEdges line)
 
@@ -64,6 +66,10 @@ getTagBlock line = takeUntil "{" (trimEdges line)
 getBlockOpeningText :: String -> String
 getBlockOpeningText line = dropUntil "{" line
 
+
+
+-- Example input: ["@diagram{", "A -> B", "B -> A"]
+-- Example output: 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
 
