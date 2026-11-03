@@ -30,3 +30,16 @@ removeEmptyLinesTest = testCase "Verify that empty lines were removed" $
         output = ["#view:tree", "Buy milk @shopping", "No tag here"]
     in
         removeEmptyLines input @?= output
+
+processBlocksTest :: TestTree
+processBlocksTest = testCase "verify that a file with multiple blocks has each blocks flattened" $
+    let
+        input = ["avant", "@multi{", "what is going on @maybe", "chocolate is whats up @bigmaybe", "}", "milieu", "@other{", "hello @x", "}", "apres"]
+        output = ["avant", "what is going on @multi@maybe", "chocolate is whats up @multi@bigmaybe", "milieu", "hello @other@x", "apres"] 
+    in
+        processBlocks input @?= output
+
+
+
+
+

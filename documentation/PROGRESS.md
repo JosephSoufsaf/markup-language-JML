@@ -39,17 +39,21 @@
 - implement sorting functions to sort alphabetically
  
 - Decide what should happen when a line is only a tag with no actual text before it, like "@shopping" with nothing written first. Right now this creates a note with empty content, which shows up as a blank line in the page. Need to decide: skip it, warn about it, or treat it some other way.
-
 ## Next
 
-- finish adding chronological sorting to Tree view and flat view.
-
 - Brainstorm new ways to render the notes besides html 
-- 
+ 
 - Make the rendered output.html file have a better style
-
-- Should try to add a way to easily create graph drawings for making figures easily 
 
 - add a way to like make a bunch of notes go under one tag with the same sort of syntax as a comment
   
 - Add a way to link different files. To create links
+
+- Determine name for predetermined tags that accomplish different things
+    - Math tag that lets you do latex math thing but with simpler syntax
+    - python tag that highlights python syntax and colors it and possibly compiles it
+    - UML diagram tag that lets you easily draw simple UML diagrams  
+
+
+
+
