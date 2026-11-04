@@ -7,6 +7,43 @@ import Data.List (isPrefixOf)
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
 
+{-
+by the end of the line splitting functions should have:
+
+1- Kept the single line notes with tags unchanged -> "hello this is a note @fake"
+2- turned any multiline tag blocks into their matching single line notes -> "@wow{hello this is incredible @good}" -> "hello this is incredible @wow@good"
+3- kept any special block tags unchanged "@python{# this is a python comment }"
+
+
+Before going through line splitting functions:
+
+#view:tree
+@python{
+#this is python code
+if x > 5:
+    return x
+}@coding@mean
+@wow{
+this is impressive @notReally
+}
+
+
+After going through line splitting functions:
+
+#view:tree
+@python{
+#this is python code
+if x > 5:
+    return x
+}
+this is impressive @wow@notReally
+
+
+-}
+
+
+
+
 -- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here\n@multi{hello\nWhat is going on @maybe\nChocolate is whats up @BigMaybe\n}"
 -- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "@multi{hello", "What is going on @maybe", "Chocolate is whats up @BigMaybe", "}"]
 splitLines :: String -> [String]
@@ -68,15 +105,7 @@ getBlockOpeningText :: String -> String
 getBlockOpeningText line = dropUntil "{" line
 
 
--- Example Input: "@python{"
--- Example output: True
--- Example Input: "@hello{"
--- Example output: False
-isSpecialBlock :: String -> Bool
-isSpecialBlock [] = False
-isSpecialBlock (x:xs)
-    | x == '@' && ('{' `elem` xs) && (takeUntil "{" xs `elem` ["python", "math", "drawing"]) = True
-    | otherwise = False
+
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
 
 
@@ -192,6 +221,61 @@ dropUntil _ [] = []
 dropUntil d (c:cs)
   | isPrefixOf d (c:cs) = drop (length d) (c:cs)
   | otherwise = dropUntil d cs
+
+
+
+
+
+-- Example Input: "@python{"
+-- Example output: True
+-- Example Input: "@hello{"
+-- Example output: False
+isSpecialBlock :: String -> Bool
+isSpecialBlock [] = False
+isSpecialBlock (x:xs)
+    | x == '@' && ('{' `elem` xs) && (takeUntil "{" xs `elem` ["python", "math", "drawing"]) = True
+    | otherwise = False
+
+
+
+
+{-
+Example input:
+@python{
+
+x = 5
+def init():
+    if x > 4:
+       return x 
+}@hello@goodbye
+
+Example output:
+Python ["hello", "goodbye"] "x = 5\ndef init()\n\t if x > 4:\n\t return x"
+-}
+parseSpecialBlock :: String -> UniqueBlock
+parseSpecialBlock line@(x:xs) = Python (parseTags (getSpecialBlockTags line)) (takeUntil "}" (dropUntil "{" line))
+
+
+
+{-
+Example input:
+@python{
+
+x = 5
+def init():
+    if x > 4:
+       return x 
+}@hello@goodbye
+
+Example output:
+["Hello", "goodbye"]
+
+-}
+getSpecialBlockTags :: String -> [String]
+getSpeciaalBlockTags string@(x:xs) = getTags (drop 1 (dropUntil "}" string))
+
+
+
 
 
 stringType :: String -> [StyledText]-> [StyledText]
