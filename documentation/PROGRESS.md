@@ -18,9 +18,10 @@
 
 - We tried exporting the data as JSON and reading it in JavaScript to build the page, but dropped that. Now Haskell builds the HTML page directly using the lucid library. No extra file in between, no second language involved.
 
+- Unique tags like @python or @drawing will be parsed into a different type of algebraic data type called UniqueBlock with constructors Python [Tag] String or Math [Tag] String or Drawing [Tag] String
 ## Done
 
-- 
+-
 
 ## Next
 
@@ -34,3 +35,6 @@
 
 - Determine how to handle giving tags to the special tag blocks. At the end of the block (@python{}@hello) or at the start after the special tag block (@python@hello{})
 
+- Change the splitLines function to make it so that it keeps UniqueBlocks like @python{} in one big string instead of seperating at each line jump
+
+- Find name for Unique block tags cause this is annoying calling them unique block tags

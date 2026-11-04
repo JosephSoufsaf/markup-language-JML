@@ -1,12 +1,9 @@
 module AST where
 
-data Note = Note Content [Tag]
+data Note = Note Content [Tag] | UniqueBlock [Tag]
     deriving (Show, Eq)
 
 data Content = Content Int [StyledText] 
-    |Drawing Int String 
-    | Code Int String 
-    | Math Int String
     deriving (Show)
 
 data Tag = Tag String
@@ -20,6 +17,10 @@ data DocTree = TagNode Tag [DocTree] | ContentNode Content
 
 data StyledText = Italic String | Bold String | Plain String
     deriving (Show, Eq)
+
+data UniqueBlock = Python [Tag] String 
+    | Math [Tag] String 
+    | Drawing [Tag] String
 
 contentIndex :: Content -> Int
 contentIndex (Content i _) = i
