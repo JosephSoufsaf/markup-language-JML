@@ -3,6 +3,7 @@ import AST
 import Data.Bifunctor (second)
 import Data.Char (isSpace, isAlpha)
 import Data.List (isPrefixOf)
+import Text.Regex.TDFA ((=~))
 
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
@@ -25,23 +26,15 @@ if x > 5:
 }@coding@mean
 @wow{
 this is impressive @notReally
+how does this work @goodlord
 }
 
 
 After going through line splitting functions:
 
-#view:tree
-@python{
-#this is python code
-if x > 5:
-    return x
-}
-this is impressive @wow@notReally
-
+["#view:tree", "@python{\n#this is python code\nif x > 5:\n\treturn x\n}@coding@mean", "this is impressive@wow@notReally", "how does this work@wowgoodlord"]
 
 -}
-
-
 
 
 -- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here\n@multi{hello\nWhat is going on @maybe\nChocolate is whats up @BigMaybe\n}"
@@ -60,8 +53,11 @@ removeEmptyLines = filter (not . all isSpace)
 -- Example output: ["view:tree", Buy milk @shopping, Finish JML parser @todo, No tag here, "@python{hello\nWhat is going on @maybe\nChocolate is whats up@BigMaybe}"]
 combine :: [String] -> [String]
 combine line@(x:xs)
-    | isSpecialBlock x = (x ++ map (++) (takeUntil "}" xs): combine xs
-    | otherwise = x:combine xs
+    | isSpecialBlock x = (x ++ map (++) (takeUntil "}" xs): combine (dropUntil "}" xs)
+    | otherwise = x:combine xs 
+    where
+        closingAt :: String
+        closingAt = "\\}[[:space:]]*@[^\n]*\n"
 
 
 -- Example input:  ["avant", "@multi{", "what is going on @maybe", "chocolate is whats up @bigmaybe", "}", "milieu", "@other{", "hello @x", "}", "apres"]
@@ -111,8 +107,6 @@ getTagBlock line = takeUntil "{" (trimEdges line)
 -- Example output : "hello"
 getBlockOpeningText :: String -> String
 getBlockOpeningText line = dropUntil "{" line
-
-
 
 
 -- Example Input: "@python{"
@@ -184,6 +178,8 @@ findHeaderValue key def headers =
 -- Example Output: "tree"
 findViewValue :: [String] -> String
 findViewValue = findHeaderValue "view" "flat"
+
+
 
 -- Example Input : ["#sort:chronological"]
 -- Example Output: "chronological"

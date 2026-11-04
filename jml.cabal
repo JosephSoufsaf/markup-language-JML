@@ -12,5 +12,10 @@ executable jml
                       text,
                       lucid,
                       process,
-                      filepath
+                      filepath,
+                      regex-tdfa
     default-language: Haskell2010
+
+
+
+
