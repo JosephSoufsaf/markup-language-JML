@@ -56,6 +56,14 @@ removeEmptyLines :: [String] -> [String]
 removeEmptyLines = filter (not . all isSpace)
 
 
+-- Example input: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "@python{hello", "What is going on @maybe", "Chocolate is whats up @BigMaybe", "}"]
+-- Example output: ["view:tree", Buy milk @shopping, Finish JML parser @todo, No tag here, "@python{hello\nWhat is going on @maybe\nChocolate is whats up@BigMaybe}"]
+combine :: [String] -> [String]
+combine line@(x:xs)
+    | isSpecialBlock x = (x ++ map (++) (takeUntil "}" xs): combine xs
+    | otherwise = x:combine xs
+
+
 -- Example input:  ["avant", "@multi{", "what is going on @maybe", "chocolate is whats up @bigmaybe", "}", "milieu", "@other{", "hello @x", "}", "apres"]
 -- Example output: ["avant", "what is going on @multi@maybe", "chocolate is whats up @multi@bigmaybe", "milieu", "hello @other@x", "apres"]
 processBlocks :: [String] -> [String]
@@ -104,6 +112,18 @@ getTagBlock line = takeUntil "{" (trimEdges line)
 getBlockOpeningText :: String -> String
 getBlockOpeningText line = dropUntil "{" line
 
+
+
+
+-- Example Input: "@python{"
+-- Example output: True
+-- Example Input: "@hello{"
+-- Example output: False
+isSpecialBlock :: String -> Bool
+isSpecialBlock [] = False
+isSpecialBlock (x:xs)
+    | x == '@' && ('{' `elem` xs) && (takeUntil "{" xs `elem` ["python", "math", "drawing"]) = True
+    | otherwise = False
 
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
@@ -185,26 +205,9 @@ assignIndex lignes = zip [0..] lignes
 
 
 -------------- START OF PARSING FUNCTIONS --------------
--- Example Input: takeUntil "{" "python{"
--- Example output: "python"
 
 -- Example Input: takeUntil "{" "python{abc"
 -- Example output: "python"
-
--- Example Input: takeUntil "{" "python"
--- Example output: "python"
-
--- Example Input: takeUntil "{" "{abc"
--- Example output: ""
-
--- Example Input: takeUntil "{" ""
--- Example output: ""
-
--- Example Input: takeUntil "{" "a{b{c"
--- Example output: "a"
-
--- Example Input: takeUntil "ab" "xxabyy"
--- Example output: "xx"
 
 -- Example Input: takeUntil "ab" "xxayy"
 -- Example output: "xxayy"
@@ -226,15 +229,6 @@ dropUntil d (c:cs)
 
 
 
--- Example Input: "@python{"
--- Example output: True
--- Example Input: "@hello{"
--- Example output: False
-isSpecialBlock :: String -> Bool
-isSpecialBlock [] = False
-isSpecialBlock (x:xs)
-    | x == '@' && ('{' `elem` xs) && (takeUntil "{" xs `elem` ["python", "math", "drawing"]) = True
-    | otherwise = False
 
 
 
