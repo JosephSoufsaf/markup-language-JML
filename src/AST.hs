@@ -26,7 +26,7 @@ contentIndex :: Content -> Int
 contentIndex (Content i _) = i
 contentIndex (Drawing i _) = i
 contentIndex (Math i _) = i
-contentIndex (Code i _) = i
+contentIndex (Python i _) = i
 
 instance Eq Content where
     a == b = contentIndex a == contentIndex b
