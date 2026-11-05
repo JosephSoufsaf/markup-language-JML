@@ -18,15 +18,12 @@ data DocTree = TagNode Tag [DocTree] | ContentNode Content
 data StyledText = Italic String | Bold String | Plain String
     deriving (Show, Eq)
 
-data UniqueBlock = Python [Tag] String 
-    | Math [Tag] String 
-    | Drawing [Tag] String
+data UniqueBlock = Python Int [Tag] String 
+    | Math Int [Tag] String 
+    | Drawing Int [Tag] String
 
 contentIndex :: Content -> Int
 contentIndex (Content i _) = i
-contentIndex (Drawing i _) = i
-contentIndex (Math i _) = i
-contentIndex (Code i _) = i
 
 instance Eq Content where
     a == b = contentIndex a == contentIndex b
