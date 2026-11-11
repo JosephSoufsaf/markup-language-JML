@@ -217,47 +217,6 @@ It should be a list of strings with each an index
 -}
 
 
-
-
-{-
-Example input:
-@python{
-
-x = 5
-def init():
-    if x > 4:
-       return x 
-}@hello@goodbye
-
-Example output:
-Python ["hello", "goodbye"] "x = 5\ndef init()\n\t if x > 4:\n\t return x"
--}
-parseUniqueBlock :: (Int, String) -> UniqueBlock
-parseUniqueBlock (int, string)
-    | getTagBlock string == "@python" = Python int (parseTags (getSpecialBlockTags string)) (takeUntil "}" (dropUntil "{" string))
-    | getTagBlock string == "@drawing" = Drawing int (parseTags (getSpecialBlockTags string)) (takeUntil "}" (dropUntil "{" string)) 
-    | getTagBlock string == "@math" = Math int (parseTags (getSpecialBlockTags string)) (takeUntil "}" (dropUntil "{" string))
- 
-
-
-{-
-Example input:
-@python{
-
-x = 5
-def init():
-    if x > 4:
-       return x 
-}@hello@goodbye
-
-Example output:
-["Hello", "goodbye"]
-
--}
-getSpecialBlockTags :: String -> [String]
-getSpecialBlockTags string = getTags (drop 1 (dropUntil "}" string))
-
-
 -- Example Input: takeUntil "{" "python{abc"
 -- Example output: "python"
 
@@ -270,13 +229,11 @@ takeUntil d (c:cs)
   | otherwise = c : takeUntil d cs
 
 
-
 dropUntil :: String -> String -> String
 dropUntil _ [] = []
 dropUntil d (c:cs)
   | isPrefixOf d (c:cs) = drop (length d) (c:cs)
   | otherwise = dropUntil d cs
-
 
 
 stringType :: String -> [StyledText]-> [StyledText]
@@ -338,6 +295,43 @@ trimEdges str =
     removeSpaces xs = xs
 
 
+{-
+Example input:
+@python{
+
+x = 5
+def init():
+    if x > 4:
+       return x 
+}@hello@goodbye
+
+Example output:
+Python ["hello", "goodbye"] "x = 5\ndef init()\n\t if x > 4:\n\t return x"
+-}
+parseUniqueBlock :: (Int, String) -> UniqueBlock
+parseUniqueBlock (int, string)
+    | getTagBlock string == "@python" = Python int (parseTags (getSpecialBlockTags string)) (takeUntil "}" (dropUntil "{" string))
+    | getTagBlock string == "@drawing" = Drawing int (parseTags (getSpecialBlockTags string)) (takeUntil "}" (dropUntil "{" string)) 
+    | getTagBlock string == "@math" = Math int (parseTags (getSpecialBlockTags string)) (takeUntil "}" (dropUntil "{" string))
+
+{-
+Example input:
+@python{
+
+x = 5
+def init():
+    if x > 4:
+       return x 
+}@hello@goodbye
+
+Example output:
+["Hello", "goodbye"]
+
+-}
+getSpecialBlockTags :: String -> [String]
+getSpecialBlockTags string = getTags (drop 1 (dropUntil "}" string))
+
+
 -- Example Input: (0, "Buy milk @shopping@walmart")
 -- Example Output: Note (Content 0 [Plain "Buy milk "]) [Tag "shopping", Tag "walmart"]
 -- A line with no @ gets no tags (getTags "" would otherwise give [Tag ""]).
@@ -345,7 +339,6 @@ parseNote :: (Int, String) -> Note
 parseNote (index, line)
     | '@' `elem` line = Note (parseContent (index, line)) (trimTags (parseTags (getTags (dropUntilTag line))))
     | otherwise       = Note (parseContent (index, line)) []
-
 
 
 -- Example Input: the full text of a .jml file
