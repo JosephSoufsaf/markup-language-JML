@@ -1,4 +1,14 @@
-# Progress - Note Markup Language 
+# Progress - Note Markup Language
+
+## General flow
+
+- text -> parse -> AST -> validate/transform -> render
+  - text is handled by the line splitting functions, header functions and the index assigning functions
+  - The parse section is handled by the parsing functions
+  - The ast is also handled by the functions and by the AST file which defines it
+  - the validation will he handled by validator.hs in the future
+  - the render is handled by render.hs but will be heavily modified later
+- hello
 
 ## Design decisions
 
@@ -19,16 +29,17 @@
 - We tried exporting the data as JSON and reading it in JavaScript to build the page, but dropped that. Now Haskell builds the HTML page directly using the lucid library. No extra file in between, no second language involved.
 
 - Unique tags like @python or @drawing will be parsed into a different type of algebraic data type called UniqueBlock with constructors Python [Tag] String or Math [Tag] String or Drawing [Tag] String
+
 ## Done
 
 -
 
 ## Next
 
-- add a way to easily create graph drawings for making figures easily 
+- add a way to easily create graph drawings for making figures easily
 
 - add a way to like make a bunch of notes go under one tag with the same sort of syntax as a comment
-  
+
 - Add a way to link different files. To create links
 
 - Determine a way to seperate special tag blocks. Parse them as Content algebraic or create a new algebraic data type for them
