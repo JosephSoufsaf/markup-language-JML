@@ -1,4 +1,4 @@
-module Helper where
+module Utils.Helper where
 
 
 import Data.Char (toLower)

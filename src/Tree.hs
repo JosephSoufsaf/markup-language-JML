@@ -34,17 +34,6 @@ buildTree (n:ns) =
         Just tags -> insertTag tags (getContent n) (buildTree ns)
 
 
--- Example input:  Content 0 [Plain "Buy ", Bold "milk"]
--- Example output: "Buy milk"
-contentText :: Content -> String
-contentText (Content _ styled) = concatMap styledText styled
-  where
-    styledText (Italic s) = s
-    styledText (Bold s)   = s
-    styledText (Plain s)  = s
-contentText (Drawing _ text)   = text
-
-
 -- Example input:  TagNode (Tag "shopping") []
 -- Example output: "shopping"
 extractString :: DocTree -> String
