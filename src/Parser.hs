@@ -3,7 +3,7 @@ import AST
 import Data.Bifunctor (second)
 import Data.Char (isSpace, isAlpha)
 import Data.List (isPrefixOf, intercalate)
-
+import Utils.Helper (dropUntil)
 
 --------------  START OF LINE SPLITTING FUNCTIONS --------------
 
@@ -39,7 +39,7 @@ After going through line splitting functions:
 -- Example input:  "#view:tree\nBuy milk @shopping\nFinish JML parser @todo\nNo tag here\n@multi{hello\nWhat is going on @maybe\nChocolate is whats up @BigMaybe\n}"
 -- Example output: ["#view:tree", "Buy milk @shopping", "Finish JML parser @todo", "No tag here", "@multi{hello", "What is going on @maybe", "Chocolate is whats up @BigMaybe", "}"]
 splitLines :: String -> [String]
-splitLines str = lines str
+splitLines str = map (filter (/= '\r')) (lines str)
 
 
 -- Example input:  ["#view:tree", "", "Buy milk @shopping", "   ", "No tag here"]
@@ -53,10 +53,18 @@ removeEmptyLines = filter (not . all isSpace)
 mergeSpecialBlocks :: [String] -> [String]
 mergeSpecialBlocks [] = []
 mergeSpecialBlocks (x:xs)
+    | isSpecialBlock x && isClosedOnOneLine x = x : mergeSpecialBlocks xs
     | isSpecialBlock x = intercalate "\n" (x : block ++ take 1 afterBlock) : mergeSpecialBlocks (drop 1 afterBlock)
     | otherwise = x : mergeSpecialBlocks xs
     where
         (block, afterBlock) = break isBlockEnd xs
+
+
+-- True when a special block opens AND closes on the same line.
+-- Example input:  "@python{x = 1}@coding"
+-- Example output: True
+isClosedOnOneLine :: String -> Bool
+isClosedOnOneLine line = '}' `elem` dropWhile (/= '{') line
 
 
 -- Example input:  "}" or "}@coding@mean"
@@ -105,13 +113,13 @@ isMultiLine line = case trimEdges line of
 -- Example input: "@shopping@maybe{hello"
 -- Example output: "@shopping@maybe"
 getTagBlock :: String -> String
-getTagBlock line = takeUntil "{" (trimEdges line)
+getTagBlock line = takeWhile (/= '{') (trimEdges line)
 
 
 -- Example input : "@shopping{hello"
 -- Example output : "hello"
 getBlockOpeningText :: String -> String
-getBlockOpeningText line = dropUntil "{" line
+getBlockOpeningText line = dropUntil (== '{') line
 
 
 -- Example Input: "@python{"
@@ -121,7 +129,7 @@ getBlockOpeningText line = dropUntil "{" line
 isSpecialBlock :: String -> Bool
 isSpecialBlock [] = False
 isSpecialBlock (x:xs)
-    | x == '@' && ('{' `elem` xs) && (takeUntil "{" xs `elem` ["python", "math", "drawing"]) = True
+    | x == '@' && ('{' `elem` xs) && (takeWhile (/= '{') xs `elem` ["python", "math", "drawing"]) = True
     | otherwise = False
 
 --------------  END OF LINE SPLITTING FUNCTIONS --------------
@@ -217,30 +225,26 @@ It should be a list of strings with each an index
 -}
 
 
--- Example Input: takeUntil "{" "python{abc"
--- Example output: "python"
-
--- Example Input: takeUntil "ab" "xxayy"
--- Example output: "xxayy"
-takeUntil :: String -> String -> String
-takeUntil _ [] = []
-takeUntil d (c:cs)
-  | isPrefixOf d (c:cs) = []
-  | otherwise = c : takeUntil d cs
-
-
-dropUntil :: String -> String -> String
-dropUntil _ [] = []
-dropUntil d (c:cs)
-  | isPrefixOf d (c:cs) = drop (length d) (c:cs)
-  | otherwise = dropUntil d cs
+-- Example Input: "bold** and more"
+-- Example output: ("bold", " and more")
+-- Splits at the closing "**" (a two character delimiter, which Helper's
+-- single-element dropUntil/takeUntil cannot express).
+-- If there is no closing "**", everything is the body.
+breakBold :: String -> (String, String)
+breakBold [] = ([], [])
+breakBold ('*':'*':xs) = ([], xs)
+breakBold (c:cs) = let (body, after) = breakBold cs in (c : body, after)
 
 
 stringType :: String -> [StyledText]-> [StyledText]
 stringType [] acc = acc
-stringType ('*':'*':rest) acc = stringType (dropUntil "**" rest) (acc ++ [Bold (takeUntil "**" rest)])
-stringType ('*':rest) acc = stringType (dropUntil "*" rest) (acc ++ [Italic (takeUntil "*" rest)])
-stringType s acc = stringType (dropWhile (/= '*') s) (acc ++ [Plain (takeWhile (/= '*') s)])
+stringType ('*':'*':rest) acc =
+    let (body, after) = breakBold rest
+    in  stringType after (acc ++ [Bold body])
+stringType ('*':rest) acc =
+    stringType (dropUntil (== '*') rest) (acc ++ [Italic (takeWhile (/= '*') rest)])
+stringType s acc =
+    stringType (dropWhile (/= '*') s) (acc ++ [Plain (takeWhile (/= '*') s)])
 
 
 -- Example Input : "Hello what is going on @tag"
@@ -308,11 +312,18 @@ def init():
 Example output:
 Python ["hello", "goodbye"] "x = 5\ndef init()\n\t if x > 4:\n\t return x"
 -}
-parseUniqueBlock :: (Int, String) -> UniqueBlock
-parseUniqueBlock (int, string)
-    | getTagBlock string == "@python" = Python int (parseTags (getSpecialBlockTags string)) (takeUntil "}" (dropUntil "{" string))
-    | getTagBlock string == "@drawing" = Drawing int (parseTags (getSpecialBlockTags string)) (takeUntil "}" (dropUntil "{" string)) 
-    | getTagBlock string == "@math" = Math int (parseTags (getSpecialBlockTags string)) (takeUntil "}" (dropUntil "{" string))
+parseUniqueBlock :: (Int, String) -> Note
+parseUniqueBlock (int, string) =
+    case getTagBlock string of
+        "@python"  -> Note (Python  int body) tags
+        "@math"    -> Note (Math    int body) tags
+        _          -> Note (Drawing int body) tags
+  where
+    afterOpen             = drop 1 (dropWhile (/= '{') string)
+    (_, revBefore) = break (== '}') (reverse afterOpen)
+    body                  = trimNewlines (reverse (drop 1 revBefore))
+    tags                  = trimTags (parseTags (getSpecialBlockTags string))
+    trimNewlines          = dropWhile (== '\n') . reverse . dropWhile (`elem` "\n\r ") . reverse
 
 {-
 Example input:
@@ -329,7 +340,10 @@ Example output:
 
 -}
 getSpecialBlockTags :: String -> [String]
-getSpecialBlockTags string = getTags (drop 1 (dropUntil "}" string))
+getSpecialBlockTags string =
+    case dropWhile (/= '@') (reverse (takeWhile (/= '}') (reverse string))) of
+        []       -> []
+        (_:rest) -> getTags rest
 
 
 -- Example Input: (0, "Buy milk @shopping@walmart")
@@ -337,6 +351,7 @@ getSpecialBlockTags string = getTags (drop 1 (dropUntil "}" string))
 -- A line with no @ gets no tags (getTags "" would otherwise give [Tag ""]).
 parseNote :: (Int, String) -> Note
 parseNote (index, line)
+    | isSpecialBlock line = parseUniqueBlock (index, line)
     | '@' `elem` line = Note (parseContent (index, line)) (trimTags (parseTags (getTags (dropUntilTag line))))
     | otherwise       = Note (parseContent (index, line)) []
 

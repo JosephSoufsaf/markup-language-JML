@@ -3,7 +3,8 @@ module Organizer where
 import AST
 import qualified Data.Map as Map
 import Data.Map (Map)
-import Data.List (sort)
+import Data.List (sort, sortBy)
+import Data.Ord (comparing)
 
 --------------  START OF ACCESSOR FUNCTIONS --------------
 
@@ -98,3 +99,43 @@ sortMiscLast pairs = filter (not . isMisc) pairs ++ filter isMisc pairs
     isMisc _               = False
 
 --------------  END OF GROUPING FUNCTIONS --------------
+
+
+
+--------------  START OF SORTING FUNCTIONS --------------
+
+-- Plain text of a piece of content, used for alphabetical sorting.
+-- Example Input : Content 0 [Plain "Buy ", Bold "milk"]
+-- Example Output: "Buy milk"
+contentText :: Content -> String
+contentText (Content _ styled) = concatMap styledText styled
+  where
+    styledText (Italic s) = s
+    styledText (Bold s)   = s
+    styledText (Plain s)  = s
+contentText (Python _ text)    = text
+contentText (Math _ text)      = text
+contentText (Drawing _ text)   = text
+
+
+-- Groups the (tag, [content]) pairs into one entry per tag, with the
+-- contents of each tag in document order.
+singleTagSorting :: [(Tag, [Content])] -> Map Tag [Content]
+singleTagSorting = sortContents . groupByFirstTag
+
+
+-- Flat view, alphabetical: groups sorted by tag name, notes by their text.
+sortFlatAlphabetical :: [(Tag, [Content])] -> [(Tag, [Content])]
+sortFlatAlphabetical groups =
+    sortBy (comparing (\(Tag name, _) -> name))
+           [ (tag, sortBy (comparing contentText) contents) | (tag, contents) <- groups ]
+
+
+-- Flat view, chronological: groups ordered by their earliest note,
+-- notes in the order they were written.
+sortFlatChronological :: [(Tag, [Content])] -> [(Tag, [Content])]
+sortFlatChronological groups =
+    sortBy (comparing (\(_, contents) -> minimum (maxBound : map contentIndex contents)))
+           [ (tag, sort contents) | (tag, contents) <- groups ]
+
+--------------  END OF SORTING FUNCTIONS --------------

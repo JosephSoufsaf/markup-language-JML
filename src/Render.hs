@@ -19,7 +19,8 @@ defaultStyle = style_ styleText
         \summary { font-weight: 600; cursor: pointer; padding: 2px 0; color: #569cd6; } \
         \summary:hover { color: #9cdcfe; } \
         \p { margin: 4px 0; color: #ce9178; } \
-        \pre.mermaid { background-color: #252526; padding: 12px; border-radius: 4px; }"
+        \pre.mermaid { background-color: #252526; padding: 12px; border-radius: 4px; } \
+        \pre.code, pre.math { background-color: #252526; padding: 12px; border-radius: 4px; overflow-x: auto; color: #d4d4d4; }"
 
 mermaidScript :: Html ()
 mermaidScript = do
@@ -45,11 +46,14 @@ renderStyled = mapM_ renderOne
 
 renderContent :: Content -> Html ()
 renderContent (Content _ styled) = p_ (renderStyled styled)
+renderContent (Python _ text)    = pre_ [class_ "code"] (code_ (toHtml text))
+renderContent (Math _ text)      = pre_ [class_ "math"] (toHtml text)
 renderContent (Drawing _ text)   = pre_ [class_ "mermaid"] (toHtml text)
 
 renderMap :: [(Tag, [Content])] -> Html ()
 renderMap = mapM_ renderGroup
   where
+    renderGroup :: (Tag, [Content]) -> Html ()
     renderGroup (Tag tag, contents) =
         details_ [open_ "open"] (summary_ (toHtml tag) <> mapM_ renderContent contents)
 

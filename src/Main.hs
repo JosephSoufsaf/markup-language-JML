@@ -2,6 +2,7 @@
 
 import System.Environment (getArgs)
 import System.Process (callCommand)
+import Control.Exception (try, SomeException)
 import System.Info (os)
 import System.FilePath (replaceExtension)
 import System.IO (openFile, hSetEncoding, hGetContents, IOMode(ReadMode), utf8)
@@ -16,7 +17,11 @@ toHtmlFilename :: String -> String
 toHtmlFilename filename = replaceExtension filename "html"
 
 openInBrowser :: String -> IO ()
-openInBrowser file = callCommand command
+openInBrowser file = do
+    result <- try (callCommand command) :: IO (Either SomeException ())
+    case result of
+        Right () -> return ()
+        Left _   -> putStrLn ("Could not open a browser automatically. Open " ++ file ++ " yourself.")
   where
     command = case os of
         "mingw32" -> "start \"\" \"" ++ file ++ "\""

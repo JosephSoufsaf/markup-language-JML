@@ -28,13 +28,15 @@ jobs:
           ~/.cabal/packages
           ~/.cabal/store
           dist-newstyle
-        key: ${{ runner.os }}-cabal-${{ hashFiles('**/*.cabal') }}
-        restore-keys: ${{ runner.os }}-cabal-
+        key: ${{ runner.os }}-ghc-9.4-cabal-${{ hashFiles('**/*.cabal') }}
+        restore-keys: ${{ runner.os }}-ghc-9.4-cabal-
 
     - name: Install dependencies
       run: |
         cabal update
         cabal build --only-dependencies
 
-    - name: Build
-      run: cabal build
+    - name: Compile selected files
+      run: |
+        cabal exec -- ghc -isrc -outputdir /tmp/ghc-out -Wall \
+          src/Parser.hs

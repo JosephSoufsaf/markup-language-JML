@@ -44,4 +44,5 @@ To run it, from the same folder as jml.exe:
 .\jml.exe notes.jml
 ```
 
-This reads notes.jml, organizes the notes, writes the result to output.html, and opens it in your default browser automatically. Each tag section is collapsible, click it to expand or hide its contents. Since this is a work in progress I have not added a wizard set 
+This reads notes.jml, organizes the notes, writes the result to output.html, and opens it in your default browser automatically. Each tag section is collapsible, click it to expand or hide its contents. Since this is a work in progress I have not added a wizard set
+
