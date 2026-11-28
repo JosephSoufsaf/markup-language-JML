@@ -78,3 +78,8 @@ digit input = satisfy isDigit input where
 eof :: String -> Maybe ((), String)
 eof "" = Just ((), "")
 eof _ = Nothing
+
+
+isNameChar :: Char -> Bool
+isNameChar c = isAlphaNum c || c == '_'
+
