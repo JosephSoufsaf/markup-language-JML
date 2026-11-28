@@ -15,3 +15,14 @@ executable jml
                       filepath,
                       regex-tdfa
     default-language: Haskell2010
+
+test-suite tests
+    type:             exitcode-stdio-1.0
+    main-is:          tests.hs
+    hs-source-dirs:   test, src
+    other-modules:    AST, Parser, Organizer, Tree, Utils.Helper
+    build-depends:    base >=4 && <5,
+                      containers,
+                      tasty,
+                      tasty-hunit
+    default-language: Haskell2010
